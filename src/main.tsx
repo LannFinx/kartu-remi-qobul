@@ -2,40 +2,61 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { MotionConfig } from 'motion/react';
 import { App } from './App';
+import { MainMenuScreen } from './components/MainMenuScreen';
 import { CardLab } from './lab/CardLab';
 import './index.css';
 
+type ScreenMode = 'menu' | 'table' | 'tutorial';
+
 const RootView: React.FC = () => {
   const params = new URLSearchParams(window.location.search);
-  const [showLab, setShowLab] = useState(() => params.has('lab'));
+  const initialMode: ScreenMode = params.has('room') || params.has('table')
+    ? 'table'
+    : params.has('tutorial')
+      ? 'tutorial'
+      : 'menu';
+
+  const [screenMode, setScreenMode] = useState<ScreenMode>(initialMode);
   const [autoLobby, setAutoLobby] = useState(() => params.has('room'));
 
   return (
     <MotionConfig reducedMotion="user">
-      {showLab ? (
+      {screenMode === 'menu' && (
+        <MainMenuScreen
+          onStartVsBot={() => {
+            setAutoLobby(false);
+            setScreenMode('table');
+          }}
+          onStartOnlineLobby={() => {
+            setAutoLobby(true);
+            setScreenMode('table');
+          }}
+          onStartTutorial={() => {
+            setScreenMode('tutorial');
+          }}
+        />
+      )}
+
+      {screenMode === 'tutorial' && (
         <CardLab
+          onBackToMenu={() => setScreenMode('menu')}
           onOpenFullTable={() => {
             setAutoLobby(false);
-            setShowLab(false);
+            setScreenMode('table');
           }}
           onOpenOnlineLobby={() => {
             setAutoLobby(true);
-            setShowLab(false);
+            setScreenMode('table');
           }}
         />
-      ) : (
-        <div className="relative">
-          <div className="fixed bottom-3 right-3 z-40">
-            <button
-              type="button"
-              onClick={() => setShowLab(true)}
-              className="btn-tactile px-3.5 py-1.5 rounded-2xl bg-slate-900 text-amber-300 border-2 border-slate-700 border-b-[4px] border-b-slate-950 font-display font-black text-xs shadow-lg"
-            >
-              Latihan Solo
-            </button>
-          </div>
-          <App autoOpenLobby={autoLobby} />
-        </div>
+      )}
+
+      {screenMode === 'table' && (
+        <App
+          autoOpenLobby={autoLobby}
+          onBackToMenu={() => setScreenMode('menu')}
+          onOpenTutorial={() => setScreenMode('tutorial')}
+        />
       )}
     </MotionConfig>
   );

@@ -14,6 +14,7 @@ export type LabPhase =
 
 export interface LabState {
   phase: LabPhase;
+  tutorialStep: number;
   drawPile: Card[];
   hand: Array<Card | null>;
   focusedCard: Card | null;
@@ -30,6 +31,7 @@ export interface LabState {
 type LabAction =
   | { type: 'deal_next' }
   | { type: 'open_first_discard' }
+  | { type: 'advance_intro' }
   | { type: 'draw_from_deck' }
   | { type: 'discard_focused' }
   | { type: 'start_keep' }
@@ -45,12 +47,43 @@ type LabAction =
 const INITIAL_HAND_SIZE = 4;
 const DEAL_INTERVAL_MS = 130;
 const FIRST_DISCARD_DELAY_MS = 380;
-export const LAB_REFLEX_DURATION_MS = 2800;
+export const LAB_REFLEX_DURATION_MS = 3400;
+
+function createTutorialDeck(): Card[] {
+  const all = createStandardDeck();
+  const findCard = (id: string) => all.find((c) => c.id === id)!;
+
+  const scriptedIds = [
+    '7_hearts',
+    '9_spades',
+    '4_clubs',
+    'Q_diamonds',
+    '3_clubs',
+    '7_diamonds',
+    'K_hearts',
+  ];
+
+  const rest = shuffleCards(
+    all.filter((c) => !scriptedIds.includes(c.id))
+  );
+
+  return [
+    ...rest,
+    findCard('K_hearts'),
+    findCard('7_diamonds'),
+    findCard('3_clubs'),
+    findCard('Q_diamonds'),
+    findCard('4_clubs'),
+    findCard('9_spades'),
+    findCard('7_hearts'),
+  ];
+}
 
 function createFreshState(): LabState {
   return {
     phase: 'dealing',
-    drawPile: shuffleCards(createStandardDeck()),
+    tutorialStep: 1,
+    drawPile: createTutorialDeck(),
     hand: Array.from({ length: INITIAL_HAND_SIZE }, () => null),
     focusedCard: null,
     focusArrivedHidden: false,
@@ -74,7 +107,9 @@ function labReducer(state: LabState, action: LabAction): LabState {
       const emptySlot = state.hand.indexOf(null);
       if (state.phase !== 'dealing' || emptySlot === -1) return state;
       const [card, drawPile] = takeTopCard(state.drawPile);
-      const hand = state.hand.map((slot, index) => (index === emptySlot ? card : slot));
+      const hand = state.hand.map((slot, index) =>
+        index === emptySlot ? card : slot
+      );
       return { ...state, drawPile, hand };
     }
     case 'open_first_discard': {
@@ -88,9 +123,21 @@ function labReducer(state: LabState, action: LabAction): LabState {
         phase: 'idle',
       };
     }
+    case 'advance_intro': {
+      return {
+        ...state,
+        tutorialStep: state.tutorialStep === 1 ? 2 : state.tutorialStep,
+      };
+    }
     case 'draw_from_deck': {
       if (state.phase !== 'idle' || state.drawPile.length === 0) return state;
       const [card, drawPile] = takeTopCard(state.drawPile);
+      const nextStep =
+        state.tutorialStep <= 2
+          ? 3
+          : state.tutorialStep === 6
+            ? 6
+            : state.tutorialStep;
       return {
         ...state,
         drawPile,
@@ -98,6 +145,7 @@ function labReducer(state: LabState, action: LabAction): LabState {
         focusArrivedHidden: true,
         lastVerdict: null,
         misfireSlotIndex: null,
+        tutorialStep: nextStep,
         phase: 'focused',
       };
     }
@@ -112,6 +160,7 @@ function labReducer(state: LabState, action: LabAction): LabState {
           discardPile: nextDiscard,
           discardArrivedHidden: false,
           focusedCard: null,
+          tutorialStep: state.tutorialStep <= 3 ? 4 : state.tutorialStep,
           phase: 'choosing_peek_slot',
         };
       }
@@ -142,27 +191,39 @@ function labReducer(state: LabState, action: LabAction): LabState {
       return {
         ...state,
         peekingSlotIndex: null,
+        tutorialStep: state.tutorialStep <= 4 ? 5 : state.tutorialStep,
         reflexWindowId: state.reflexWindowId + 1,
         phase: 'reflex_window',
       };
     }
     case 'start_keep':
-      return state.phase === 'focused' ? { ...state, phase: 'choosing_slot' } : state;
+      return state.phase === 'focused'
+        ? { ...state, phase: 'choosing_slot' }
+        : state;
     case 'cancel_keep':
       return state.phase === 'choosing_slot'
         ? { ...state, phase: 'focused', focusArrivedHidden: false }
         : state;
     case 'keep_into_slot': {
       const replacedCard = state.hand[action.slotIndex];
-      if (state.phase !== 'choosing_slot' || !state.focusedCard || !replacedCard) return state;
+      if (
+        state.phase !== 'choosing_slot' ||
+        !state.focusedCard ||
+        !replacedCard
+      ) {
+        return state;
+      }
       const keptCard = state.focusedCard;
       return {
         ...state,
-        hand: state.hand.map((slot, index) => (index === action.slotIndex ? keptCard : slot)),
+        hand: state.hand.map((slot, index) =>
+          index === action.slotIndex ? keptCard : slot
+        ),
         discardPile: [...state.discardPile, replacedCard],
         discardArrivedHidden: true,
         knownCardIds: [...state.knownCardIds, keptCard.id],
         focusedCard: null,
+        tutorialStep: 7,
         reflexWindowId: state.reflexWindowId + 1,
         phase: 'reflex_window',
       };
@@ -185,6 +246,7 @@ function labReducer(state: LabState, action: LabAction): LabState {
           discardPile: [...state.discardPile, targetCard],
           discardArrivedHidden: true,
           misfireSlotIndex: null,
+          tutorialStep: state.tutorialStep === 5 ? 6 : state.tutorialStep,
           reflexWindowId: state.reflexWindowId + 1,
           lastVerdict: {
             id: `${Date.now()}`,
@@ -232,6 +294,7 @@ function labReducer(state: LabState, action: LabAction): LabState {
         ...state,
         misfireSlotIndex: null,
         lastVerdict: null,
+        tutorialStep: state.tutorialStep === 5 ? 6 : state.tutorialStep,
         phase: 'idle',
       };
     }
@@ -251,7 +314,9 @@ export function useCardLabState() {
     const timer = window.setTimeout(
       () =>
         dispatch(
-          isInitialHandDealt ? { type: 'open_first_discard' } : { type: 'deal_next' }
+          isInitialHandDealt
+            ? { type: 'open_first_discard' }
+            : { type: 'deal_next' }
         ),
       isInitialHandDealt ? FIRST_DISCARD_DELAY_MS : DEAL_INTERVAL_MS
     );

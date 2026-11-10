@@ -39,9 +39,15 @@ const REFLEX_WINDOW_MS = 2800;
 
 interface AppProps {
   autoOpenLobby?: boolean;
+  onBackToMenu?: () => void;
+  onOpenTutorial?: () => void;
 }
 
-export const App: React.FC<AppProps> = ({ autoOpenLobby = false }) => {
+export const App: React.FC<AppProps> = ({
+  autoOpenLobby = false,
+  onBackToMenu,
+  onOpenTutorial,
+}) => {
   const clientId = useMemo(() => getOrCreateClientId(), []);
   const [playerName, setPlayerName] = useState<string>('Pemain 1');
   const [playerCount, setPlayerCount] = useState<number>(4);
@@ -479,6 +485,8 @@ export const App: React.FC<AppProps> = ({ autoOpenLobby = false }) => {
             isMuted={isMuted}
             announcerText={announcerText}
             isViewerTurn={isViewerActiveHuman}
+            onBackToMenu={onBackToMenu}
+            onOpenTutorial={onOpenTutorial}
             onOpenLobby={() => setIsLobbyOpen(true)}
             onChangePlayerCount={(count) => handleDealNewSimulation(count)}
             onTogglePassAndPlay={() => {

@@ -4,6 +4,8 @@ import {
   BookOpen,
   Gamepad2,
   Globe,
+  GraduationCap,
+  Home,
   RefreshCw,
   Sparkles,
   Users,
@@ -22,6 +24,8 @@ interface GameTopHudProps {
   isMuted: boolean;
   announcerText: string;
   isViewerTurn: boolean;
+  onBackToMenu?: () => void;
+  onOpenTutorial?: () => void;
   onOpenLobby: () => void;
   onChangePlayerCount: (count: number) => void;
   onTogglePassAndPlay: () => void;
@@ -40,6 +44,8 @@ export const GameTopHud: React.FC<GameTopHudProps> = ({
   isMuted,
   announcerText,
   isViewerTurn,
+  onBackToMenu,
+  onOpenTutorial,
   onOpenLobby,
   onChangePlayerCount,
   onTogglePassAndPlay,
@@ -50,7 +56,20 @@ export const GameTopHud: React.FC<GameTopHudProps> = ({
   return (
     <div className="w-full flex flex-col gap-2">
       <div className="w-full flex flex-wrap items-center justify-between gap-2">
-        <div className="inline-flex items-center gap-2.5 bg-gradient-to-b from-[#1e6f43] to-[#114227] border-2 border-amber-300 border-b-[4px] border-b-amber-600 rounded-2xl px-3.5 py-1.5 shadow-[0_6px_16px_rgba(15,23,42,0.16)] text-white select-none">
+        <div className="flex items-center gap-2">
+          {onBackToMenu && (
+            <button
+              type="button"
+              onClick={onBackToMenu}
+              aria-label="Kembali ke Main Menu"
+              className="btn-tactile h-9 sm:h-10 px-3 rounded-2xl bg-slate-900 border-2 border-slate-700 border-b-[4px] border-b-slate-950 text-white font-display font-black text-xs inline-flex items-center gap-1.5 shadow-md"
+            >
+              <Home className="w-3.5 h-3.5 text-amber-300" />
+              <span className="hidden sm:inline">Menu</span>
+            </button>
+          )}
+
+          <div className="inline-flex items-center gap-2.5 bg-gradient-to-b from-[#1e6f43] to-[#114227] border-2 border-amber-300 border-b-[4px] border-b-amber-600 rounded-2xl px-3.5 py-1.5 shadow-[0_6px_16px_rgba(15,23,42,0.16)] text-white select-none">
           <div className="relative w-7 h-7 flex items-center justify-center">
             <span className="absolute -rotate-12 -translate-x-1 w-4 h-5 rounded-[3px] bg-white border border-slate-300 shadow text-[9px] font-black text-red-600 flex items-center justify-center">
               K♥
@@ -67,6 +86,7 @@ export const GameTopHud: React.FC<GameTopHudProps> = ({
             <span className="px-2 py-0.5 rounded-lg bg-amber-400 text-slate-950 font-display font-black text-[11px] shadow-inner">
               R#{roundNumber}
             </span>
+          </div>
           </div>
         </div>
 
@@ -163,6 +183,18 @@ export const GameTopHud: React.FC<GameTopHudProps> = ({
             )}
           </button>
 
+          {onOpenTutorial && (
+            <button
+              type="button"
+              onClick={onOpenTutorial}
+              aria-label="Tutorial Visual Novel"
+              className="btn-tactile h-9 sm:h-10 px-2.5 sm:px-3 rounded-2xl bg-gradient-to-b from-emerald-400 to-emerald-600 border-2 border-emerald-200 border-b-[4px] border-b-emerald-800 text-slate-950 font-display font-black text-xs inline-flex items-center gap-1 shadow-md"
+            >
+              <GraduationCap className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Tutorial</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={onOpenRules}
@@ -201,3 +233,4 @@ export const GameTopHud: React.FC<GameTopHudProps> = ({
     </div>
   );
 };
+
