@@ -319,3 +319,4 @@ export const VisualNovelBanner: React.FC<VisualNovelBannerProps> = ({
     </motion.div>
   );
 };
+
