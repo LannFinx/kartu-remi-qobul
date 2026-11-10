@@ -24,6 +24,7 @@ interface GameTopHudProps {
   isMuted: boolean;
   announcerText: string;
   isViewerTurn: boolean;
+  latencyMs?: number | null;
   onBackToMenu?: () => void;
   onOpenTutorial?: () => void;
   onOpenLobby: () => void;
@@ -44,6 +45,7 @@ export const GameTopHud: React.FC<GameTopHudProps> = ({
   isMuted,
   announcerText,
   isViewerTurn,
+  latencyMs = null,
   onBackToMenu,
   onOpenTutorial,
   onOpenLobby,
@@ -77,8 +79,22 @@ export const GameTopHud: React.FC<GameTopHudProps> = ({
             R#{roundNumber}
           </span>
           {roomRole !== 'offline' && (
-            <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-bold text-[10px] border border-emerald-200">
-              {roomCode} ({memberCount}P)
+            <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 font-bold text-[10px] border border-emerald-200 inline-flex items-center gap-1.5 tabular-nums">
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  latencyMs && latencyMs < 90
+                    ? 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.8)]'
+                    : latencyMs && latencyMs < 180
+                      ? 'bg-amber-500'
+                      : 'bg-emerald-400'
+                }`}
+              />
+              <span>{roomCode} • {memberCount}P</span>
+              {latencyMs !== null && latencyMs !== undefined && (
+                <span className="text-[9px] text-emerald-600 font-extrabold">
+                  {latencyMs}ms
+                </span>
+              )}
             </span>
           )}
         </div>

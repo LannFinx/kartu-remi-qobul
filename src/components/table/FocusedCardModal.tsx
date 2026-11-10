@@ -1,6 +1,6 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { ArrowLeftRight, Eye, Shuffle, Sparkles, Trash2 } from 'lucide-react';
+import { ArrowLeftRight, Eye, Shuffle, Trash2, Wand2 } from 'lucide-react';
 import { Card, SpecialAbilityType } from '../../types/game';
 import { PlayingCard } from '../PlayingCard';
 
@@ -17,12 +17,12 @@ const ABILITY_META: Record<
   { label: string; badgeClass: string; Icon: React.FC<{ className?: string }> }
 > = {
   peek_own: {
-    label: 'Intip Kartumu',
+    label: 'Intip Kartu Sendiri',
     badgeClass: 'bg-sky-400 text-slate-950',
     Icon: Eye,
   },
   peek_opponent: {
-    label: 'Intip Lawan',
+    label: 'Intip Kartu Lawan',
     badgeClass: 'bg-cyan-300 text-slate-950',
     Icon: Eye,
   },
@@ -39,7 +39,7 @@ const ABILITY_META: Record<
   special_swap_king: {
     label: 'Intip & Tukar',
     badgeClass: 'bg-rose-500 text-white',
-    Icon: Sparkles,
+    Icon: Wand2,
   },
 };
 
@@ -62,7 +62,7 @@ export const FocusedCardModal: React.FC<FocusedCardModalProps> = ({
       ? 'bg-emerald-400 text-slate-950'
       : card.pointValue >= 13
         ? 'bg-red-600 text-white'
-        : 'bg-white/95 text-slate-950';
+        : 'bg-white text-slate-950';
 
   return (
     <>
@@ -70,7 +70,7 @@ export const FocusedCardModal: React.FC<FocusedCardModalProps> = ({
         {isOpen && card && (
           <motion.div
             key="focused-card-backdrop"
-            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-[3px]"
+            className="fixed inset-0 z-40 bg-black/65 backdrop-blur-[3px]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.14 } }}
@@ -80,17 +80,17 @@ export const FocusedCardModal: React.FC<FocusedCardModalProps> = ({
       </AnimatePresence>
 
       {isOpen && card && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 pointer-events-none px-4">
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 pointer-events-none px-4 select-none">
           <motion.div
             className="flex items-center gap-2 pointer-events-auto"
-            initial={{ opacity: 0, scale: 0.85, y: 10 }}
+            initial={{ opacity: 0, scale: 0.88, y: 8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ type: 'spring', visualDuration: 0.3, bounce: 0.3 }}
+            transition={{ type: 'spring', visualDuration: 0.3, bounce: 0.25 }}
           >
             <span
-              className={`px-3 py-1 rounded-full font-display font-black text-xs tracking-wide shadow-lg ${pointBadgeClass}`}
+              className={`px-3 py-1 rounded-full font-display font-black text-xs tracking-wider shadow-lg ${pointBadgeClass}`}
             >
-              {card.pointValue > 0 ? `+${card.pointValue}` : card.pointValue} PTS
+              {card.pointValue > 0 ? `+${card.pointValue}` : card.pointValue} POIN
             </span>
 
             {abilityInfo && (
@@ -116,39 +116,39 @@ export const FocusedCardModal: React.FC<FocusedCardModalProps> = ({
             initial={{ opacity: 0, y: 10, scale: 0.92 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{
-              delay: 0.14,
+              delay: 0.12,
               type: 'spring',
               visualDuration: 0.3,
-              bounce: 0.25,
+              bounce: 0.2,
             }}
           >
             <button
               type="button"
               onClick={onKeepAndSwap}
-              className="btn-tactile h-12 px-6 rounded-full bg-white text-slate-950 font-display font-extrabold text-sm shadow-xl hover:bg-white/90 inline-flex items-center gap-2"
+              className="btn-tactile h-12 px-6 rounded-full bg-white text-slate-950 font-display font-black text-xs sm:text-sm tracking-wide shadow-xl hover:bg-white/95 inline-flex items-center gap-2"
             >
               <ArrowLeftRight className="w-4 h-4" />
-              <span>Tukar</span>
+              <span>SIMPAN & TUKAR</span>
             </button>
 
             <button
               type="button"
               onClick={onDiscardOrUseAbility}
-              className={`btn-tactile h-12 px-6 rounded-full font-display font-extrabold text-sm shadow-xl inline-flex items-center gap-2 ${
+              className={`btn-tactile h-12 px-6 rounded-full font-display font-black text-xs sm:text-sm tracking-wide shadow-xl inline-flex items-center gap-2 ${
                 hasAbility
                   ? 'bg-amber-400 text-slate-950 hover:bg-amber-300 ring-2 ring-amber-200/60'
-                  : 'bg-white/15 hover:bg-white/25 text-white ring-1 ring-white/30'
+                  : 'bg-white/20 hover:bg-white/30 text-white border border-white/25'
               }`}
             >
               {hasAbility ? (
                 <>
-                  <Sparkles className="w-4 h-4" />
-                  <span>Pakai Efek</span>
+                  <Wand2 className="w-4 h-4" />
+                  <span>PAKAI KEMAMPUAN</span>
                 </>
               ) : (
                 <>
                   <Trash2 className="w-4 h-4" />
-                  <span>Buang</span>
+                  <span>BUANG KARTU</span>
                 </>
               )}
             </button>
@@ -158,4 +158,3 @@ export const FocusedCardModal: React.FC<FocusedCardModalProps> = ({
     </>
   );
 };
-

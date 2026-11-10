@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { GameState } from '../types/game';
 import { CenterDeckHub } from './CenterDeckHub';
 import { PlayerSeat } from './PlayerSeat';
+import { OpponentHorizonPod } from './table/OpponentHorizonPod';
 import { ReflexTimerBar } from './table/ReflexTimerBar';
 
 interface OvalTableArenaProps {
@@ -174,8 +175,45 @@ export const OvalTableArena: React.FC<OvalTableArenaProps> = ({
   }
 
   return (
-    <div className="relative w-full rounded-[32px] sm:rounded-[48px] bg-[radial-gradient(ellipse_at_50%_45%,#23804f_0%,#17613a_55%,#0c3d24_100%)] border-[6px] sm:border-[8px] border-white shadow-[0_20px_50px_rgba(15,23,42,0.16),inset_0_2px_18px_rgba(0,0,0,0.35)] px-3 py-4 sm:px-7 sm:py-6 flex flex-col justify-between gap-4 sm:gap-5 overflow-hidden">
-      <div className="relative z-10 flex lg:hidden flex-wrap items-start justify-center gap-2 sm:gap-4">
+    <div className="relative w-full rounded-[32px] sm:rounded-[48px] bg-[radial-gradient(ellipse_at_50%_45%,#23804f_0%,#17613a_55%,#0c3d24_100%)] border-[5px] sm:border-[8px] border-white shadow-[0_20px_50px_rgba(15,23,42,0.16),inset_0_2px_18px_rgba(0,0,0,0.35)] px-2.5 py-3 sm:px-7 sm:py-6 flex flex-col justify-between gap-2.5 sm:gap-5 overflow-hidden">
+      <div className="relative z-10 flex sm:hidden items-center justify-around gap-1.5 w-full">
+        {opponentIndices.map((idx) => {
+          const p = players[idx];
+          if (!p) return null;
+          const isActive = currentPlayerIndex === idx && !gameState.isRoundOver;
+          const isWaitingForSlotSwap =
+            isActive &&
+            idx === safeViewerIdx &&
+            !p.isBot &&
+            turnSubPhase === 'selecting_hand_slot_for_discard_swap';
+          const canSlamDuringReflex =
+            idx === safeViewerIdx &&
+            !p.isBot &&
+            isReflexPhase &&
+            !gameState.isRoundOver;
+          const seatActionText =
+            lastTableMove && lastTableMove.actorId === p.id
+              ? lastTableMove.label
+              : null;
+
+          return (
+            <OpponentHorizonPod
+              key={`pod_${p.id}`}
+              player={p}
+              isActiveTurn={isActive}
+              isQobulCaller={qobulCallerId === p.id}
+              revealAllCards={revealAllCards}
+              peekedSlotKey={peekedSlotKey}
+              misfireSlotKey={misfireSlotKey}
+              selectableSlots={isWaitingForSlotSwap || canSlamDuringReflex}
+              seatActionText={seatActionText}
+              onSelectSlot={onSelectCardSlot}
+            />
+          );
+        })}
+      </div>
+
+      <div className="relative z-10 hidden sm:flex lg:hidden flex-wrap items-start justify-center gap-2 sm:gap-4">
         {opponentIndices.map((idx) => (
           <div key={`mob_${players[idx]?.id}`} className="flex justify-center">
             {renderSeat(idx, false)}

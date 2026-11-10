@@ -333,6 +333,7 @@ export function enterReflexMatchingWindow(state: GameState): GameState {
   return {
     ...state,
     turnSubPhase: 'reflex_matching_window',
+    matchClaimedThisWindow: false,
     drawnCardBuffer: null,
     drawnFromSource: null,
     activeAbility: null,
@@ -345,6 +346,7 @@ export function completeReflexWindowAndAdvance(state: GameState): GameState {
   }
   return advanceToNextPlayerTurn({
     ...state,
+    matchClaimedThisWindow: false,
     lastReflexVerdict: null,
   });
 }
@@ -370,6 +372,65 @@ export function attemptReflexCardSlam(
   const isActiveActor =
     state.players[state.currentPlayerIndex]?.id === player.id;
 
+  if (state.matchClaimedThisWindow) {
+    const { nextDraw, nextDiscard } = replenishDrawPileIfNeeded(
+      state.drawPile,
+      state.discardPile
+    );
+
+    const penaltyCard = nextDraw[nextDraw.length - 1];
+    const remainingDeck = penaltyCard ? nextDraw.slice(0, -1) : nextDraw;
+
+    const updatedPlayers = state.players.map((p) => {
+      if (p.id !== player.id || !penaltyCard) return p;
+      const maxExistingIndex = p.hand.reduce(
+        (maxIdx, s) => Math.max(maxIdx, s.slotIndex),
+        3
+      );
+      return {
+        ...p,
+        hand: [
+          ...p.hand,
+          {
+            slotIndex: maxExistingIndex + 1,
+            card: penaltyCard,
+            isRevealedToAll: false,
+            hasBeenPeekedByOwner: false,
+          },
+        ],
+      };
+    });
+
+    const detail = `TELAT! ${player.name} kalah cepat menaruh kartu kembar. Kena +1 kartu penalti!`;
+
+    return {
+      ...state,
+      players: updatedPlayers,
+      drawPile: remainingDeck,
+      discardPile: nextDiscard,
+      lastTableMove: {
+        id: `move_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        actorId: player.id,
+        actorName: player.name,
+        kind: 'slam_late',
+        label: `${player.name} telat match! +1 Kartu Penalti`,
+        targetPlayerId: player.id,
+        targetSlotIndex: slotIndex,
+      },
+      lastReflexVerdict: {
+        id: `${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        actorName: player.name,
+        succeeded: false,
+        isLate: true,
+        detail,
+      },
+      actionLogs: [
+        createLogEntry(player.name, detail, 'penalty'),
+        ...state.actionLogs,
+      ],
+    };
+  }
+
   if (targetSlot.card.rank === topDiscard.rank) {
     const remainingHand: HandSlot[] = player.hand.filter(
       (slot) => slot.slotIndex !== slotIndex
@@ -384,6 +445,7 @@ export function attemptReflexCardSlam(
 
     const nextState: GameState = {
       ...state,
+      matchClaimedThisWindow: true,
       players: updatedPlayers,
       discardPile: [...state.discardPile, targetSlot.card],
       lastTableMove: {
@@ -391,7 +453,7 @@ export function attemptReflexCardSlam(
         actorId: player.id,
         actorName: player.name,
         kind: 'slam_match',
-        label: `⚡ ${player.name} buang cepat kembar ${targetSlot.card.rank}${getSuitSymbol(targetSlot.card.suit)}!`,
+        label: `${player.name} buang cepat kembar ${targetSlot.card.rank}${getSuitSymbol(targetSlot.card.suit)}!`,
         targetPlayerId: player.id,
         targetSlotIndex: slotIndex,
       },
@@ -399,6 +461,7 @@ export function attemptReflexCardSlam(
         id: `${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         actorName: player.name,
         succeeded: true,
+        isLate: false,
         detail,
       },
       actionLogs: [
@@ -454,7 +517,7 @@ export function attemptReflexCardSlam(
       actorId: player.id,
       actorName: player.name,
       kind: 'slam_penalty',
-      label: `🔥 ${player.name} salah tebak! +1 Kartu Penalti`,
+      label: `${player.name} salah tebak! +1 Kartu Penalti`,
       targetPlayerId: player.id,
       targetSlotIndex: slotIndex,
     },
@@ -462,6 +525,7 @@ export function attemptReflexCardSlam(
       id: `${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       actorName: player.name,
       succeeded: false,
+      isLate: false,
       detail,
     },
     actionLogs: [

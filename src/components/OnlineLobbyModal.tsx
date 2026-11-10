@@ -6,7 +6,6 @@ import {
   Globe,
   LogOut,
   Play,
-  Sparkles,
   Users,
   X,
 } from 'lucide-react';
@@ -56,45 +55,45 @@ export const OnlineLobbyModal: React.FC<OnlineLobbyModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 select-none">
       <motion.div
-        initial={{ opacity: 0, scale: 0.92, y: 10 }}
+        initial={{ opacity: 0, scale: 0.94, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ type: 'spring', visualDuration: 0.28, bounce: 0.25 }}
-        className="w-full max-w-md rounded-3xl bg-[#12492d] border-2 border-amber-300/60 shadow-2xl p-6 space-y-5 text-white relative"
+        transition={{ type: 'spring', visualDuration: 0.28, bounce: 0.2 }}
+        className="w-full max-w-md rounded-3xl bg-[#11442a] border-2 border-amber-300/50 shadow-2xl p-6 space-y-5 text-white relative"
       >
         <button
           type="button"
           onClick={onClose}
           aria-label="Tutup"
-          className="btn-tactile absolute top-4 right-4 w-8 h-8 rounded-full bg-black/30 hover:bg-black/50 flex items-center justify-center text-white/80"
+          className="btn-tactile absolute top-4 right-4 w-8 h-8 rounded-full bg-black/35 hover:bg-black/55 flex items-center justify-center text-white/80"
         >
           <X className="w-4 h-4" />
         </button>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center shadow">
             <Globe className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="font-display font-extrabold text-lg leading-tight">
-              Mabar Online
+            <h2 className="font-display font-black text-lg tracking-tight leading-tight">
+              Lobi Mabar Online
             </h2>
             <span className="text-xs text-emerald-200/80 font-medium">
-              {role === 'offline' ? 'Main bareng teman beda layar' : statusText}
+              {role === 'offline' ? 'Bermain lintas perangkat secara privat' : statusText}
             </span>
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-white/80">Nama Kamu</label>
+          <label className="text-xs font-bold text-white/80">Nama Pemain</label>
           <input
             type="text"
             value={playerName}
             maxLength={16}
             onChange={(e) => onChangePlayerName(e.target.value)}
-            placeholder="Ketik namamu…"
-            className="w-full h-11 px-4 rounded-2xl bg-black/35 border border-white/20 text-sm font-bold text-white placeholder:text-white/40 focus:outline-none focus:border-amber-300"
+            placeholder="Ketik namamu..."
+            className="w-full h-11 px-4 rounded-2xl bg-black/35 border border-white/20 text-sm font-bold text-white placeholder:text-white/35 focus:outline-none focus:border-amber-300"
           />
         </div>
 
@@ -103,16 +102,15 @@ export const OnlineLobbyModal: React.FC<OnlineLobbyModalProps> = ({
             <button
               type="button"
               onClick={onCreateHostRoom}
-              className="btn-tactile w-full h-12 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-display font-extrabold text-sm shadow-lg inline-flex items-center justify-center gap-2"
+              className="btn-tactile w-full h-12 rounded-2xl bg-amber-400 hover:bg-amber-300 border border-amber-200 border-b-[3px] border-b-amber-600 text-slate-950 font-display font-black text-xs sm:text-sm tracking-wide shadow-md flex items-center justify-center gap-2"
             >
-              <Sparkles className="w-4 h-4" />
-              <span>Buat Room Baru (Host)</span>
+              <span>BUAT ROOM BARU (HOST)</span>
             </button>
 
             <div className="flex items-center gap-2">
               <div className="h-px flex-1 bg-white/15" />
-              <span className="text-[11px] font-bold text-white/50 uppercase">
-                Atau Gabung
+              <span className="text-[10px] font-bold text-white/45 uppercase tracking-wider">
+                Atau Gabung Room
               </span>
               <div className="h-px flex-1 bg-white/15" />
             </div>
@@ -123,16 +121,16 @@ export const OnlineLobbyModal: React.FC<OnlineLobbyModalProps> = ({
                 value={joinCodeInput}
                 maxLength={6}
                 onChange={(e) => setJoinCodeInput(e.target.value.toUpperCase())}
-                placeholder="Kode 4 Digit (mis. 4829)"
-                className="flex-1 h-11 px-4 rounded-2xl bg-black/35 border border-white/20 text-sm font-display font-extrabold tracking-widest text-amber-300 placeholder:text-white/35 placeholder:tracking-normal placeholder:font-sans focus:outline-none focus:border-amber-300"
+                placeholder="Kode 4 Angka (mis. 4829)"
+                className="flex-1 h-11 px-4 rounded-2xl bg-black/35 border border-white/20 text-sm font-display font-black tracking-widest text-amber-300 placeholder:text-white/30 placeholder:tracking-normal placeholder:font-sans focus:outline-none focus:border-amber-300"
               />
               <button
                 type="button"
                 disabled={joinCodeInput.trim().length < 3}
                 onClick={() => onJoinRoom(joinCodeInput)}
-                className="btn-tactile h-11 px-5 rounded-2xl bg-white text-slate-950 font-display font-extrabold text-xs shadow disabled:opacity-40"
+                className="btn-tactile h-11 px-5 rounded-2xl bg-white text-slate-950 font-display font-black text-xs shadow disabled:opacity-40"
               >
-                Gabung
+                GABUNG
               </button>
             </div>
           </div>
@@ -140,8 +138,8 @@ export const OnlineLobbyModal: React.FC<OnlineLobbyModalProps> = ({
           <div className="space-y-4">
             <div className="rounded-2xl bg-black/35 border border-amber-300/40 p-4 flex items-center justify-between">
               <div>
-                <div className="text-[11px] font-bold text-amber-200/80 uppercase">
-                  Kode Room
+                <div className="text-[10px] font-bold text-amber-200/80 uppercase tracking-widest">
+                  KODE ROOM
                 </div>
                 <div className="font-display font-black text-2xl tracking-widest text-amber-300">
                   {roomCode}
@@ -151,7 +149,7 @@ export const OnlineLobbyModal: React.FC<OnlineLobbyModalProps> = ({
               <button
                 type="button"
                 onClick={handleCopyInvite}
-                className="btn-tactile h-10 px-4 rounded-xl bg-white/15 hover:bg-white/25 text-xs font-extrabold inline-flex items-center gap-1.5"
+                className="btn-tactile h-10 px-4 rounded-xl bg-white/15 hover:bg-white/25 text-xs font-bold inline-flex items-center gap-1.5"
               >
                 {copied ? (
                   <>
@@ -174,7 +172,7 @@ export const OnlineLobbyModal: React.FC<OnlineLobbyModalProps> = ({
                   <span>Kursi Meja ({members.length}/{totalSeats} Pemain)</span>
                 </span>
                 <span className="text-[11px] text-emerald-300">
-                  Sisa kursi diisi Bot
+                  Sisa kursi otomatis Bot
                 </span>
               </div>
 
@@ -221,18 +219,18 @@ export const OnlineLobbyModal: React.FC<OnlineLobbyModalProps> = ({
                     onStartOnlineMatch();
                     onClose();
                   }}
-                  className="btn-tactile flex-1 h-11 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-display font-extrabold text-xs shadow-lg inline-flex items-center justify-center gap-1.5"
+                  className="btn-tactile flex-1 h-11 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-display font-black text-xs shadow-lg inline-flex items-center justify-center gap-1.5"
                 >
                   <Play className="w-4 h-4 fill-slate-950" />
-                  <span>Mulai / Bagi Kartu</span>
+                  <span>MULAI PERMAINAN</span>
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={onClose}
-                  className="btn-tactile flex-1 h-11 rounded-2xl bg-white text-slate-950 font-display font-extrabold text-xs shadow-lg"
+                  className="btn-tactile flex-1 h-11 rounded-2xl bg-white text-slate-950 font-display font-black text-xs shadow-lg"
                 >
-                  Ke Meja Permainan
+                  KE MEJA PERMAINAN
                 </button>
               )}
             </div>
@@ -242,4 +240,3 @@ export const OnlineLobbyModal: React.FC<OnlineLobbyModalProps> = ({
     </div>
   );
 };
-

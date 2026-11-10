@@ -161,12 +161,12 @@ export const AbilityActionModal: React.FC<AbilityActionModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-3 sm:p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/75 backdrop-blur-sm p-0 sm:p-4 select-none">
       <motion.div
-        initial={{ opacity: 0, scale: 0.92, y: 10 }}
+        initial={{ opacity: 0, scale: 0.96, y: 24 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ type: 'spring', visualDuration: 0.28, bounce: 0.25 }}
-        className="w-full max-w-xl max-h-[90dvh] overflow-y-auto rounded-3xl bg-[#12492d] border-2 border-amber-300/70 shadow-2xl p-4 sm:p-6 flex flex-col items-center gap-4 text-white"
+        transition={{ type: 'spring', visualDuration: 0.28, bounce: 0.2 }}
+        className="w-full max-w-xl max-h-[88dvh] sm:max-h-[90dvh] overflow-y-auto rounded-t-[32px] sm:rounded-3xl bg-[#11442a] border-t-2 sm:border-2 border-amber-300/70 shadow-2xl p-4 sm:p-6 flex flex-col items-center gap-4 text-white"
       >
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/40 border border-amber-300/40">
           <Sparkles className="w-4 h-4 text-amber-300" />

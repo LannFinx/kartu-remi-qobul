@@ -64,6 +64,7 @@ export interface ReflexVerdict {
   actorName: string;
   succeeded: boolean;
   detail: string;
+  isLate?: boolean;
 }
 
 export interface ActiveAbilityContext {
@@ -139,6 +140,7 @@ export interface TableMoveAnnouncement {
     | 'ability'
     | 'slam_match'
     | 'slam_penalty'
+    | 'slam_late'
     | 'qobul';
   label: string;
   targetPlayerId?: string;
@@ -163,5 +165,6 @@ export interface GameState {
   actionLogs: ActionLogEntry[];
   lastReflexVerdict: ReflexVerdict | null;
   lastTableMove?: TableMoveAnnouncement | null;
+  matchClaimedThisWindow?: boolean;
 }
 

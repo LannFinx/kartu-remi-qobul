@@ -246,3 +246,56 @@ export function playPenaltyBuzzerSound(): void {
     osc.stop(start + 0.17);
   });
 }
+
+export function playComicalLateSound(): void {
+  if (isSoundMuted) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  const now = ctx.currentTime;
+  const slide = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  slide.type = 'sawtooth';
+  slide.frequency.setValueAtTime(320, now);
+  slide.frequency.exponentialRampToValueAtTime(110, now + 0.32);
+
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(700, now);
+  filter.frequency.linearRampToValueAtTime(300, now + 0.32);
+
+  gain.gain.setValueAtTime(0.2, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+  slide.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+
+  slide.start(now);
+  slide.stop(now + 0.36);
+}
+
+export function playEmotePopSound(): void {
+  if (isSoundMuted) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  const now = ctx.currentTime;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(440, now);
+  osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
+
+  gain.gain.setValueAtTime(0.18, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start(now);
+  osc.stop(now + 0.1);
+}
+

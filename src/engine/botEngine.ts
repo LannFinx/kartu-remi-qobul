@@ -19,7 +19,8 @@ export function executeBotReflexCheck(state: GameState): GameState {
   if (
     state.turnSubPhase !== 'reflex_matching_window' ||
     state.discardPile.length === 0 ||
-    state.isRoundOver
+    state.isRoundOver ||
+    state.matchClaimedThisWindow
   ) {
     return state;
   }

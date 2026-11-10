@@ -2,12 +2,14 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { LayoutGroup } from 'motion/react';
 import { Shield } from 'lucide-react';
 import { AbilityActionModal } from './components/AbilityActionModal';
+import { FloatingEmoteOverlay } from './components/FloatingEmoteOverlay';
 import { GameTopHud } from './components/GameTopHud';
 import { OnlineLobbyModal } from './components/OnlineLobbyModal';
 import { OvalTableArena } from './components/OvalTableArena';
 import { RulesQuickModal } from './components/RulesQuickModal';
 import { ShowdownModal } from './components/ShowdownModal';
 import { FocusedCardModal } from './components/table/FocusedCardModal';
+import { LatePenaltyModal } from './components/table/LatePenaltyModal';
 import { createStandardDeck } from './engine/deck';
 import { executeBotReflexCheck, executeSmartBotTurn } from './engine/botEngine';
 import {
@@ -16,8 +18,10 @@ import {
 } from './engine/gameEngine';
 import { applyRemoteActionToState } from './engine/onlineActionReducer';
 import {
+  EmotePayload,
   generateRoomCode,
   getOrCreateClientId,
+  maskOpponentHiddenCards,
   OnlineRoomTransport,
   RemoteGameAction,
   RoomMember,
@@ -34,6 +38,7 @@ import {
   playVictoryChime,
   setSoundMuted,
 } from './engine/soundEffects';
+import { triggerHaptic } from './engine/haptics';
 
 const REFLEX_WINDOW_MS = 2800;
 
@@ -64,6 +69,10 @@ export const App: React.FC<AppProps> = ({
   const [roomCode, setRoomCode] = useState<string>('');
   const [roomStatus, setRoomStatus] = useState<string>('Offline');
   const [roomMembers, setRoomMembers] = useState<RoomMember[]>([]);
+  const [latencyMs, setLatencyMs] = useState<number | null>(null);
+  const [activeEmotes, setActiveEmotes] = useState<EmotePayload[]>([]);
+  const [isLateModalOpen, setIsLateModalOpen] = useState<boolean>(false);
+  const [lateActorName, setLateActorName] = useState<string>('');
 
   const [gameState, setGameState] = useState(() =>
     createInitialGameState({
@@ -157,7 +166,9 @@ export const App: React.FC<AppProps> = ({
           roleRef.current === 'guest'
         ) {
           setRoomMembers(packet.members);
-          setGameState(packet.state);
+          const currentMem = packet.members.find((m) => m.clientId === clientId);
+          const currentSeat = currentMem ? currentMem.seatIndex : 0;
+          setGameState(maskOpponentHiddenCards(packet.state, currentSeat));
         } else if (
           packet.type === 'CLIENT_ACTION' &&
           roleRef.current === 'host'
@@ -177,7 +188,14 @@ export const App: React.FC<AppProps> = ({
           });
         }
       },
-      (status) => setRoomStatus(status)
+      (status) => setRoomStatus(status),
+      (lat) => setLatencyMs(lat),
+      (emote) => {
+        setActiveEmotes((prev) => [...prev, emote]);
+        window.setTimeout(() => {
+          setActiveEmotes((prev) => prev.filter((e) => e.id !== emote.id));
+        }, 2400);
+      }
     );
 
     transportRef.current = transport;
@@ -216,6 +234,26 @@ export const App: React.FC<AppProps> = ({
       playVictoryChime();
     }
   }, [gameState.isRoundOver]);
+
+  useEffect(() => {
+    if (gameState.lastReflexVerdict) {
+      if (gameState.lastReflexVerdict.succeeded) {
+        triggerHaptic('match');
+      } else {
+        triggerHaptic('late');
+      }
+      if (gameState.lastReflexVerdict.isLate) {
+        setLateActorName(gameState.lastReflexVerdict.actorName);
+        setIsLateModalOpen(true);
+      }
+    }
+  }, [gameState.lastReflexVerdict]);
+
+  useEffect(() => {
+    if (gameState.qobulCallerId) {
+      triggerHaptic('qobul');
+    }
+  }, [gameState.qobulCallerId]);
 
   useEffect(() => {
     if (!misfireSlotKey) return;
@@ -316,6 +354,24 @@ export const App: React.FC<AppProps> = ({
       return;
     }
     setGameState((prev) => applyRemoteActionToState(prev, action));
+  };
+
+  const handleSendEmote = (emoji: string, label?: string) => {
+    const activeSeat = viewerPlayerIndex;
+    const actor = gameState.players[activeSeat];
+    const emotePayload: EmotePayload = {
+      id: `emote_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      clientId,
+      senderSeatIndex: activeSeat,
+      senderName: actor?.name ?? playerName,
+      emoji,
+      label,
+    };
+    transportRef.current?.sendEmote(emotePayload);
+    setActiveEmotes((prev) => [...prev, emotePayload]);
+    window.setTimeout(() => {
+      setActiveEmotes((prev) => prev.filter((e) => e.id !== emotePayload.id));
+    }, 2400);
   };
 
   const handleCreateHostRoom = () => {
@@ -430,6 +486,15 @@ export const App: React.FC<AppProps> = ({
     gameState.currentPlayerIndex === viewerPlayerIndex &&
     !activePlayer?.isBot;
 
+  useEffect(() => {
+    if (
+      isViewerActiveHuman &&
+      gameState.turnSubPhase === 'awaiting_draw_or_qobul'
+    ) {
+      triggerHaptic('turn');
+    }
+  }, [isViewerActiveHuman, gameState.turnSubPhase]);
+
   const isViewerHoldingDeckCard =
     isViewerActiveHuman &&
     gameState.turnSubPhase === 'holding_deck_card' &&
@@ -437,31 +502,31 @@ export const App: React.FC<AppProps> = ({
 
   const announcerText = useMemo(() => {
     if (gameState.isRoundOver) {
-      return 'Ronde selesai! Semua kartu dibuka';
+      return 'Putaran Selesai';
     }
     if (gameState.turnSubPhase === 'reflex_matching_window') {
-      return `Jeda Refleks! Punya angka ${topDiscard?.rank ?? ''}? Ketuk kartumu cepat!`;
+      return `Refleks: Kartu ${topDiscard?.rank ?? ''}`;
     }
     if (isViewerActiveHuman) {
       if (gameState.turnSubPhase === 'awaiting_draw_or_qobul') {
-        return 'Giliranmu! Ketuk Dek / Buangan di tengah meja, atau Teriak QOBUL!';
+        return 'Giliran Anda: Ambil Dek atau Buangan';
       }
       if (gameState.turnSubPhase === 'holding_deck_card') {
-        return 'Kartu diambil! Pilih Tukar ke Matriks 2×2 atau Buang';
+        return 'Pilih: Tukar ke Tangan atau Buang';
       }
       if (
         gameState.turnSubPhase === 'selecting_hand_slot_for_discard_swap'
       ) {
-        return 'Ketuk salah satu dari 4 kartumu di meja untuk menaruh kartu baru!';
+        return 'Pilih slot kartu di meja';
       }
       if (gameState.turnSubPhase === 'executing_special_ability') {
-        return 'Kartu Sakti aktif! Ikuti petunjuk di layar';
+        return 'Kemampuan kartu aktif';
       }
     }
     if (gameState.lastTableMove) {
       return gameState.lastTableMove.label;
     }
-    return `Giliran ${activePlayer?.name ?? 'Lawan'} sedang bermain...`;
+    return `Giliran ${activePlayer?.name ?? 'Lawan'}`;
   }, [
     gameState.isRoundOver,
     gameState.turnSubPhase,
@@ -485,6 +550,7 @@ export const App: React.FC<AppProps> = ({
             isMuted={isMuted}
             announcerText={announcerText}
             isViewerTurn={isViewerActiveHuman}
+            latencyMs={latencyMs}
             onBackToMenu={onBackToMenu}
             onOpenTutorial={onOpenTutorial}
             onOpenLobby={() => setIsLobbyOpen(true)}
@@ -668,6 +734,17 @@ export const App: React.FC<AppProps> = ({
             );
           }}
           onResetGame={() => handleDealNewSimulation(playerCount)}
+        />
+
+        <LatePenaltyModal
+          isOpen={isLateModalOpen}
+          actorName={lateActorName}
+          onDismiss={() => setIsLateModalOpen(false)}
+        />
+
+        <FloatingEmoteOverlay
+          activeEmotes={activeEmotes}
+          onSendEmote={handleSendEmote}
         />
       </div>
     </LayoutGroup>

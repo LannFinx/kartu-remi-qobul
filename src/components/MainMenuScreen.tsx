@@ -2,11 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import {
   BookOpen,
-  Flame,
-  Globe,
-  GraduationCap,
   Play,
-  Sparkles,
+  Users,
   Volume2,
   VolumeX,
 } from 'lucide-react';
@@ -28,31 +25,31 @@ interface MainMenuScreenProps {
 const SHOWCASE_CARDS = [
   {
     id: 'K_hearts',
-    tilt: -14,
-    offsetY: 10,
-    badge: 'K Merah = -1 Poin!',
-    badgeColor: 'bg-amber-400 text-slate-950',
+    tilt: -12,
+    offsetY: 8,
+    title: 'King Merah (♥ / ♦)',
+    rule: 'Nilai −1 Poin',
   },
   {
     id: '7_diamonds',
-    tilt: -5,
+    tilt: -4,
     offsetY: 0,
-    badge: '7 & 8 = Intip Sendiri',
-    badgeColor: 'bg-sky-400 text-slate-950',
+    title: 'Kartu 7 & 8',
+    rule: 'Intip 1 Kartu Sendiri',
   },
   {
     id: '10_clubs',
-    tilt: 5,
+    tilt: 4,
     offsetY: 0,
-    badge: '10 = Intip Lawan',
-    badgeColor: 'bg-emerald-400 text-slate-950',
+    title: 'Kartu 9 & 10',
+    rule: 'Intip 1 Kartu Lawan',
   },
   {
     id: 'K_spades',
-    tilt: 14,
-    offsetY: 10,
-    badge: 'K Hitam = Intip & Tukar',
-    badgeColor: 'bg-purple-300 text-slate-950',
+    tilt: 12,
+    offsetY: 8,
+    title: 'King Hitam (♠ / ♣)',
+    rule: 'Intip & Tukar Kartu',
   },
 ];
 
@@ -100,12 +97,15 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
   };
 
   return (
-    <main className="min-h-[100dvh] canvas-vignette flex flex-col items-center justify-between px-3 py-3 sm:px-6 sm:py-5 text-slate-900 overflow-x-hidden">
-      <div className="w-full max-w-4xl flex items-center justify-between">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-slate-900 text-white border-2 border-slate-700 border-b-[4px] border-b-slate-950 shadow-md">
-          <Flame className="w-4 h-4 text-amber-400" />
-          <span className="font-display font-black text-xs tracking-wide">
-            EDISI 2.0 • BLIND START
+    <main className="min-h-[100dvh] canvas-vignette flex flex-col items-center justify-between px-3 py-4 sm:px-6 sm:py-6 text-slate-900 overflow-x-hidden select-none">
+      <header className="w-full max-w-4xl flex items-center justify-between px-1">
+        <div className="flex items-center gap-2 text-slate-800">
+          <span className="font-display font-black text-sm tracking-tight">
+            Ahnap<span className="text-emerald-700">Qobul</span>
+          </span>
+          <span className="text-slate-300">•</span>
+          <span className="text-xs font-semibold text-slate-500">
+            Meja Kartu Remi
           </span>
         </div>
 
@@ -120,49 +120,55 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
               });
             }}
             aria-label={isMuted ? 'Nyalakan suara' : 'Matikan suara'}
-            className="btn-tactile w-10 h-10 rounded-2xl bg-slate-900 border-2 border-slate-700 border-b-[4px] border-b-slate-950 text-white flex items-center justify-center shadow-md"
+            className="btn-tactile w-9 h-9 rounded-xl bg-white border border-slate-200/90 text-slate-700 hover:text-slate-950 hover:bg-slate-50 flex items-center justify-center shadow-xs"
           >
             {isMuted ? (
-              <VolumeX className="w-4 h-4 text-red-400" />
+              <VolumeX className="w-4 h-4 text-red-500" />
             ) : (
-              <Volume2 className="w-4 h-4 text-emerald-400" />
+              <Volume2 className="w-4 h-4 text-slate-700" />
             )}
           </button>
 
           <button
             type="button"
             onClick={() => setIsRulesOpen(true)}
-            className="btn-tactile h-10 px-3.5 rounded-2xl bg-slate-900 border-2 border-slate-700 border-b-[4px] border-b-slate-950 text-white font-display font-extrabold text-xs inline-flex items-center gap-1.5 shadow-md"
+            className="btn-tactile h-9 px-3.5 rounded-xl bg-white border border-slate-200/90 text-slate-800 hover:bg-slate-50 font-display font-bold text-xs inline-flex items-center gap-1.5 shadow-xs"
           >
-            <BookOpen className="w-4 h-4 text-amber-300" />
+            <BookOpen className="w-3.5 h-3.5 text-slate-600" />
             <span>Aturan</span>
           </button>
         </div>
-      </div>
+      </header>
 
       <motion.section
-        initial={{ opacity: 0, y: 12, scale: 0.98 }}
+        initial={{ opacity: 0, y: 10, scale: 0.99 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ type: 'spring', visualDuration: 0.35, bounce: 0.2 }}
-        className="w-full max-w-4xl my-auto rounded-[36px] sm:rounded-[52px] bg-[radial-gradient(ellipse_at_50%_38%,#23804f_0%,#17613a_55%,#0c3d24_100%)] border-[6px] sm:border-[8px] border-white shadow-[0_24px_60px_rgba(15,23,42,0.2),inset_0_2px_20px_rgba(0,0,0,0.4)] px-4 py-6 sm:px-10 sm:py-9 flex flex-col items-center text-center text-white gap-5 sm:gap-6 relative overflow-hidden"
+        transition={{ type: 'spring', visualDuration: 0.35, bounce: 0.15 }}
+        className="w-full max-w-4xl my-auto rounded-[36px] sm:rounded-[48px] bg-[radial-gradient(ellipse_at_50%_35%,#217a4b_0%,#155b36_58%,#0b3820_100%)] border-[6px] sm:border-[8px] border-white shadow-[0_24px_60px_rgba(15,23,42,0.18),inset_0_2px_24px_rgba(0,0,0,0.45)] px-5 py-7 sm:px-12 sm:py-10 flex flex-col items-center text-center text-white gap-6 sm:gap-7 relative overflow-hidden"
       >
-        <div className="flex flex-col items-center gap-2">
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-black/35 border border-amber-300/50 text-amber-200 font-display font-extrabold text-[11px] uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            <span>Permainan Kartu Memori & Refleks</span>
+        <div className="pointer-events-none absolute inset-3 sm:inset-4 rounded-[26px] sm:rounded-[36px] border border-amber-200/15" />
+
+        <div className="relative z-10 flex flex-col items-center gap-2">
+          <div
+            className="flex items-center gap-3 text-amber-300/75 text-xs sm:text-sm tracking-[0.25em] font-semibold"
+            aria-hidden="true"
+          >
+            <span>♠</span>
+            <span className="text-red-300/80">♥</span>
+            <span>♣</span>
+            <span className="text-red-300/80">♦</span>
           </div>
 
-          <h1 className="font-display font-black text-4xl sm:text-6xl tracking-tight text-white drop-shadow-[0_4px_0_rgba(0,0,0,0.45)]">
+          <h1 className="font-display font-black text-4xl sm:text-6xl tracking-tight text-white drop-shadow-[0_3px_10px_rgba(0,0,0,0.35)]">
             Ahnap<span className="text-amber-300">Qobul</span>
           </h1>
 
-          <p className="text-xs sm:text-sm text-emerald-100/90 max-w-md font-medium">
-            4 kartu tertutup rapat, intip pakai kartu sakti, adu cepat buang
-            kartu kembar, dan raih poin terkecil!
+          <p className="text-xs sm:text-sm text-emerald-100/80 font-medium tracking-wide">
+            Empat Kartu. Satu Ingatan. Poin Terendah.
           </p>
         </div>
 
-        <div className="flex flex-col items-center gap-3 py-1">
+        <div className="relative z-10 flex flex-col items-center gap-3.5 py-1">
           <div className="flex items-center justify-center -space-x-3 sm:-space-x-2 py-2">
             {SHOWCASE_CARDS.map((item) => {
               const cardObj = fullDeck.find((c) => c.id === item.id);
@@ -173,7 +179,9 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
               return (
                 <div
                   key={item.id}
-                  style={{ transform: `translateY(${item.offsetY}px)` }}
+                  style={{
+                    transform: `translateY(${isFocused ? item.offsetY - 6 : item.offsetY}px)`,
+                  }}
                   className="transition-transform duration-200"
                 >
                   <PlayingCard
@@ -190,42 +198,41 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
             })}
           </div>
 
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-black/40 border border-white/15 text-xs font-bold">
-            <span
-              className={`px-2 py-0.5 rounded-full font-display font-black text-[10px] ${activeShowcaseMeta.badgeColor}`}
-            >
-              {activeShowcaseMeta.badge}
+          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-black/35 border border-white/15 backdrop-blur-xs text-xs">
+            <span className="font-display font-extrabold text-amber-300">
+              {activeShowcaseMeta.title}
             </span>
-            <span className="text-white/75 text-[11px]">
-              Ketuk kartu di atas untuk membalik!
+            <span className="text-white/30">•</span>
+            <span className="text-white/90 font-semibold">
+              {activeShowcaseMeta.rule}
             </span>
           </div>
         </div>
 
-        <div className="w-full max-w-md flex flex-col gap-3 pt-1">
+        <div className="relative z-10 w-full max-w-sm flex flex-col gap-2.5 pt-1">
           <button
             type="button"
             onClick={() => {
               playCardSlideSound();
               onStartVsBot();
             }}
-            className="btn-tactile w-full h-14 rounded-2xl bg-gradient-to-b from-amber-300 via-amber-400 to-amber-500 border-2 border-amber-100 border-b-[5px] border-b-amber-700 text-slate-950 font-display font-black text-base sm:text-lg shadow-[0_10px_24px_rgba(245,158,11,0.4)] flex items-center justify-center gap-2.5"
+            className="btn-tactile w-full h-13 sm:h-14 rounded-2xl bg-amber-400 hover:bg-amber-300 border border-amber-200 border-b-[4px] border-b-amber-600 text-slate-950 font-display font-black text-sm sm:text-base tracking-wide shadow-[0_8px_20px_rgba(0,0,0,0.28)] flex items-center justify-center gap-2"
           >
-            <Play className="w-5 h-5 fill-slate-950" />
-            <span>MAIN SEKARANG (Meja 4 Pemain)</span>
+            <Play className="w-4 h-4 fill-slate-950" />
+            <span>MAIN SEKARANG</span>
           </button>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-2 gap-2.5">
             <button
               type="button"
               onClick={() => {
                 playCardSlideSound();
                 onStartOnlineLobby();
               }}
-              className="btn-tactile h-12 rounded-2xl bg-gradient-to-b from-sky-400 to-sky-600 border-2 border-sky-200 border-b-[4px] border-b-sky-800 text-white font-display font-black text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2"
+              className="btn-tactile h-11 sm:h-12 rounded-2xl bg-black/35 hover:bg-black/50 border border-white/20 border-b-[3px] border-b-black/60 text-white font-display font-extrabold text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2"
             >
-              <Globe className="w-4 h-4" />
-              <span>Mabar Online</span>
+              <Users className="w-4 h-4 text-amber-300" />
+              <span>MABAR ONLINE</span>
             </button>
 
             <button
@@ -234,17 +241,17 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
                 playCardSlideSound();
                 onStartTutorial();
               }}
-              className="btn-tactile h-12 rounded-2xl bg-gradient-to-b from-emerald-400 to-emerald-600 border-2 border-emerald-200 border-b-[4px] border-b-emerald-800 text-slate-950 font-display font-black text-xs sm:text-sm shadow-lg flex items-center justify-center gap-2"
+              className="btn-tactile h-11 sm:h-12 rounded-2xl bg-black/35 hover:bg-black/50 border border-white/20 border-b-[3px] border-b-black/60 text-white font-display font-extrabold text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2"
             >
-              <GraduationCap className="w-4 h-4" />
-              <span>Tutorial (Visual Novel)</span>
+              <BookOpen className="w-4 h-4 text-emerald-300" />
+              <span>TUTORIAL</span>
             </button>
           </div>
         </div>
       </motion.section>
 
-      <footer className="text-[11px] font-bold text-slate-500">
-        AhnapQobul • Mabar Remi Blind Start
+      <footer className="text-[11px] font-semibold text-slate-400 tracking-wide">
+        AhnapQobul
       </footer>
 
       <RulesQuickModal

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { motion } from 'motion/react';
 import confetti from 'canvas-confetti';
-import { Crown, Flame, RotateCcw, Sparkles, Trophy } from 'lucide-react';
+import { Crown, RotateCcw } from 'lucide-react';
 import { GameState } from '../types/game';
 import { PlayingCard } from './PlayingCard';
 
@@ -29,8 +29,8 @@ export const ShowdownModal: React.FC<ShowdownModalProps> = ({
       const winner = roundSummary?.find((s) => s.isRoundWinner);
       if (winner && !winner.playerId.includes('bot')) {
         confetti({
-          particleCount: 80,
-          spread: 70,
+          particleCount: 70,
+          spread: 60,
           origin: { y: 0.6 },
           colors: ['#F59E0B', '#10B981', '#06B6D4', '#FFFFFF'],
         });
@@ -41,35 +41,35 @@ export const ShowdownModal: React.FC<ShowdownModalProps> = ({
   if (!isOpen || !roundSummary) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto select-none">
       <motion.div
-        initial={{ opacity: 0, scale: 0.92, y: 12 }}
+        initial={{ opacity: 0, scale: 0.94, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ type: 'spring', visualDuration: 0.32, bounce: 0.25 }}
-        className="w-full max-w-3xl rounded-3xl bg-[#12492d] border-2 border-amber-300/60 shadow-2xl p-5 sm:p-6 space-y-5 my-6 text-white"
+        transition={{ type: 'spring', visualDuration: 0.32, bounce: 0.2 }}
+        className="w-full max-w-3xl rounded-3xl bg-[#11442a] border-2 border-amber-300/50 shadow-2xl p-5 sm:p-7 space-y-5 my-6 text-white"
       >
-        <div className="flex flex-col items-center gap-2 text-center">
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-400 text-slate-950 font-display font-black text-xs shadow">
-            <Trophy className="w-3.5 h-3.5" />
-            <span>RONDE #{roundNumber} SELESAI</span>
-          </div>
+        <div className="flex flex-col items-center gap-1.5 text-center">
+          <span className="font-display font-extrabold text-xs uppercase tracking-widest text-amber-300">
+            Hasil Putaran #{roundNumber}
+          </span>
+
+          <h2 className="font-display font-black text-2xl tracking-tight text-white">
+            Pembuktian Kartu
+          </h2>
 
           {caller && callerSummary && (
             <div
-              className={`mt-1 inline-flex items-center gap-2 px-4 py-1.5 rounded-full font-display font-extrabold text-xs shadow-lg ${
+              className={`mt-1 inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full font-display font-extrabold text-xs shadow-md ${
                 callerSummary.callerSucceeded
                   ? 'bg-emerald-400 text-slate-950'
                   : 'bg-red-600 text-white'
               }`}
             >
-              <Flame className="w-4 h-4" />
-              {callerSummary.callerSucceeded ? (
-                <span>QOBUL SUKSES! {caller.name} (0 PTS)</span>
-              ) : (
-                <span>
-                  BLUNDER! {caller.name} (+{config.qobulBlunderPenalty} Penalti)
-                </span>
-              )}
+              <span>
+                {callerSummary.callerSucceeded
+                  ? `Qobul Berhasil: ${caller.name} (0 Poin)`
+                  : `Qobul Gagal: ${caller.name} (+${config.qobulBlunderPenalty} Penalti)`}
+              </span>
             </div>
           )}
         </div>
@@ -85,7 +85,7 @@ export const ShowdownModal: React.FC<ShowdownModalProps> = ({
                 key={player.id}
                 className={`rounded-2xl p-3 border flex flex-col items-center gap-2.5 ${
                   isWinner
-                    ? 'bg-amber-400/20 border-amber-300 shadow-lg'
+                    ? 'bg-amber-400/20 border-amber-300/80 shadow-md'
                     : 'bg-black/30 border-white/10'
                 }`}
               >
@@ -93,10 +93,13 @@ export const ShowdownModal: React.FC<ShowdownModalProps> = ({
                   <span className="font-display font-extrabold text-xs truncate">
                     {player.name}
                   </span>
-                  {isWinner && <Crown className="w-4 h-4 text-amber-300 shrink-0" />}
-                  {isCaller && !isWinner && (
-                    <Flame className="w-3.5 h-3.5 text-red-400 shrink-0" />
-                  )}
+                  {isWinner ? (
+                    <Crown className="w-4 h-4 text-amber-300 shrink-0" />
+                  ) : isCaller ? (
+                    <span className="text-[10px] font-bold text-red-300">
+                      QOBUL
+                    </span>
+                  ) : null}
                 </div>
 
                 <div className="grid grid-cols-2 gap-1.5 place-items-center">
@@ -111,11 +114,11 @@ export const ShowdownModal: React.FC<ShowdownModalProps> = ({
                   ))}
                 </div>
 
-                <div className="flex items-center justify-between w-full pt-1 border-t border-white/10 text-[11px] font-bold">
-                  <span className="text-amber-300">
-                    +{summary?.appliedPoints ?? 0} pts
+                <div className="flex items-center justify-between w-full pt-1.5 border-t border-white/10 text-[11px] font-bold">
+                  <span className="text-amber-300 tabular-nums">
+                    +{summary?.appliedPoints ?? 0} poin
                   </span>
-                  <span className="text-white/60">
+                  <span className="text-white/60 tabular-nums">
                     Total {player.cumulativeScore}p
                   </span>
                 </div>
@@ -127,20 +130,19 @@ export const ShowdownModal: React.FC<ShowdownModalProps> = ({
         <div className="flex items-center justify-center gap-3 pt-2">
           <button
             type="button"
-            onClick={onResetGame}
-            className="btn-tactile h-11 px-5 rounded-full bg-black/35 hover:bg-black/50 text-white/90 text-xs font-extrabold inline-flex items-center gap-1.5"
+            onClick={onStartNextRound}
+            className="btn-tactile px-6 py-2.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-display font-black text-xs sm:text-sm tracking-wide shadow-lg"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset Skor</span>
+            Lanjut Putaran Berikutnya
           </button>
 
           <button
             type="button"
-            onClick={onStartNextRound}
-            className="btn-tactile h-11 px-6 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-display font-extrabold text-xs shadow-xl inline-flex items-center gap-1.5"
+            onClick={onResetGame}
+            className="btn-tactile px-4 py-2.5 rounded-full bg-black/40 hover:bg-black/60 border border-white/20 text-white font-display font-bold text-xs inline-flex items-center gap-1.5"
           >
-            <Sparkles className="w-4 h-4" />
-            <span>Ronde #{roundNumber + 1}</span>
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Mulai Ulang</span>
           </button>
         </div>
       </motion.div>

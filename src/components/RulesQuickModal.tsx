@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, ShieldAlert, Sparkles, Trophy, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Card } from '../types/game';
 import { PlayingCard } from './PlayingCard';
 
@@ -19,73 +19,73 @@ export const RulesQuickModal: React.FC<RulesQuickModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 overflow-y-auto">
-      <div className="relative w-full max-w-4xl rounded-3xl bg-slate-900 border border-amber-500/30 shadow-2xl p-6 sm:p-8 space-y-6 my-8">
-        <div className="flex items-center justify-between border-b border-white/10 pb-4">
-          <div className="flex items-center gap-2.5">
-            <BookOpen className="w-6 h-6 text-amber-400" />
-            <h2 className="font-display font-extrabold text-xl sm:text-2xl text-white">
-              Panduan Aturan Qobul (Variasi Blind Start)
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto select-none">
+      <div className="relative w-full max-w-3xl rounded-3xl bg-[#11442a] border-2 border-amber-300/40 shadow-2xl p-5 sm:p-7 space-y-6 my-6 text-white">
+        <div className="flex items-center justify-between border-b border-white/15 pb-3.5">
+          <div>
+            <h2 className="font-display font-black text-lg sm:text-xl tracking-tight text-white">
+              Aturan Meja AhnapQobul
             </h2>
+            <p className="text-xs text-emerald-200/75 font-medium">
+              Raih total nilai poin kartu terendah di akhir putaran
+            </p>
           </div>
 
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
+            aria-label="Tutup aturan"
+            className="btn-tactile w-8 h-8 rounded-full bg-black/35 hover:bg-black/55 flex items-center justify-center text-white/80"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm">
-          <div className="rounded-2xl bg-slate-950/70 border border-white/10 p-4 space-y-2">
-            <div className="font-display font-bold text-amber-400 flex items-center gap-1.5">
-              <Trophy className="w-4 h-4" />
-              <span>1. Blind Start & Tujuan</span>
-            </div>
-            <p className="text-slate-300 leading-relaxed">
-              Setiap pemain mendapat 4 kartu tertutup rapat (2x2). Dilarang mengintip di awal! Pemenang adalah pemilik total nilai kartu terkecil.
-            </p>
+        <div className="divide-y divide-white/10 rounded-2xl bg-black/30 border border-white/10 px-4 py-1 text-xs sm:text-sm">
+          <div className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+            <span className="font-display font-extrabold text-amber-300">
+              Matriks 2×2 Tertutup
+            </span>
+            <span className="text-white/85 sm:text-right">
+              4 kartu awal tertutup rapat. Intip hanya lewat efek kartu khusus.
+            </span>
           </div>
 
-          <div className="rounded-2xl bg-slate-950/70 border border-white/10 p-4 space-y-2">
-            <div className="font-display font-bold text-cyan-400 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4" />
-              <span>2. Aktifasi Kartu Sakti</span>
-            </div>
-            <p className="text-slate-300 leading-relaxed">
-              Efek kartu sakti (7, 8, 10, J, Q, K Hitam) hanya aktif jika diambil langsung dari Draw Pile lalu langsung dibuang ke Discard Pile.
-            </p>
+          <div className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+            <span className="font-display font-extrabold text-amber-300">
+              Adu Cepat Kartu Kembar
+            </span>
+            <span className="text-white/85 sm:text-right">
+              Buang kartu berangka sama ke buangan. Salah atau telat: +1 kartu penalti.
+            </span>
           </div>
 
-          <div className="rounded-2xl bg-slate-950/70 border border-white/10 p-4 space-y-2">
-            <div className="font-display font-bold text-red-400 flex items-center gap-1.5">
-              <ShieldAlert className="w-4 h-4" />
-              <span>3. Seruan "QOBUL!"</span>
-            </div>
-            <p className="text-slate-300 leading-relaxed">
-              Memicu 1 giliran terakhir bagi lawan. Kartu pemanggil TIDAK dikunci! Jika gagal jadi yang terendah murni, kena penalti +{blunderPenalty} poin.
-            </p>
+          <div className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+            <span className="font-display font-extrabold text-amber-300">
+              Seruan Qobul
+            </span>
+            <span className="text-white/85 sm:text-right">
+              Lawan mendapat 1 giliran terakhir. Gagal terendah murni: +{blunderPenalty} poin.
+            </span>
           </div>
         </div>
 
         <div className="space-y-3">
-          <h3 className="font-display font-bold text-sm uppercase tracking-wider text-slate-400">
-            Nilai Poin & Kemampuan Khusus Kartu
+          <h3 className="font-display font-bold text-xs uppercase tracking-widest text-emerald-200/70">
+            Nilai Poin & Kemampuan Kartu
           </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 place-items-center">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 place-items-center">
             {sampleCards.map((card) => (
               <div
                 key={card.id}
-                className="flex flex-col items-center gap-2 bg-slate-950/80 border border-white/10 p-2.5 rounded-2xl w-full"
+                className="flex flex-col items-center gap-2 bg-black/30 border border-white/10 p-2.5 rounded-2xl w-full"
               >
                 <PlayingCard card={card} isFaceUp size="sm" />
                 <div className="text-center">
                   <div className="text-[11px] font-bold text-white leading-tight">
                     {card.abilityLabel}
                   </div>
-                  <div className="text-[10px] text-amber-300 font-semibold mt-0.5">
+                  <div className="text-[10px] text-amber-300 font-semibold mt-0.5 tabular-nums">
                     {card.pointValue} Poin
                   </div>
                 </div>
@@ -97,4 +97,3 @@ export const RulesQuickModal: React.FC<RulesQuickModalProps> = ({
     </div>
   );
 };
-
