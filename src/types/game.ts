@@ -127,6 +127,24 @@ export interface GameConfig {
   botCount: number;
 }
 
+export interface TableMoveAnnouncement {
+  id: string;
+  actorId: string;
+  actorName: string;
+  kind:
+    | 'draw_deck'
+    | 'draw_discard'
+    | 'swap_card'
+    | 'discard_card'
+    | 'ability'
+    | 'slam_match'
+    | 'slam_penalty'
+    | 'qobul';
+  label: string;
+  targetPlayerId?: string;
+  targetSlotIndex?: number;
+}
+
 export interface GameState {
   config: GameConfig;
   roundNumber: number;
@@ -144,5 +162,6 @@ export interface GameState {
   roundSummary: RoundSummaryItem[] | null;
   actionLogs: ActionLogEntry[];
   lastReflexVerdict: ReflexVerdict | null;
+  lastTableMove?: TableMoveAnnouncement | null;
 }
 

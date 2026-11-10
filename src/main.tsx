@@ -7,8 +7,7 @@ import './index.css';
 
 const RootView: React.FC = () => {
   const params = new URLSearchParams(window.location.search);
-  const hasTableOrRoom = params.has('table') || params.has('room');
-  const [showLab, setShowLab] = useState(() => !hasTableOrRoom);
+  const [showLab, setShowLab] = useState(() => params.has('lab'));
   const [autoLobby, setAutoLobby] = useState(() => params.has('room'));
 
   return (
@@ -26,13 +25,13 @@ const RootView: React.FC = () => {
         />
       ) : (
         <div className="relative">
-          <div className="fixed bottom-4 right-4 z-40">
+          <div className="fixed bottom-3 right-3 z-40">
             <button
               type="button"
               onClick={() => setShowLab(true)}
-              className="btn-tactile px-4 py-2 rounded-full bg-amber-400 text-slate-950 font-display font-extrabold text-xs shadow-lg hover:bg-amber-300"
+              className="btn-tactile px-3.5 py-1.5 rounded-2xl bg-slate-900 text-amber-300 border-2 border-slate-700 border-b-[4px] border-b-slate-950 font-display font-black text-xs shadow-lg"
             >
-              Mode 1 Pemain (Lab)
+              Latihan Solo
             </button>
           </div>
           <App autoOpenLobby={autoLobby} />

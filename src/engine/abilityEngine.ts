@@ -41,6 +41,13 @@ export function discardDrawnCardAndCheckAbility(
       discardPile: updatedDiscard,
       drawnCardBuffer: null,
       drawnFromSource: null,
+      lastTableMove: {
+        id: `move_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        actorId: actor.id,
+        actorName: actor.name,
+        kind: 'discard_card',
+        label: `${actor.name} membuang ${card.rank}${getSuitSymbol(card.suit)} ke Buangan`,
+      },
       actionLogs: [
         buildAbilityLog(
           actor.name,
@@ -69,6 +76,13 @@ export function discardDrawnCardAndCheckAbility(
     drawnCardBuffer: null,
     drawnFromSource: null,
     turnSubPhase: 'executing_special_ability',
+    lastTableMove: {
+      id: `move_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      actorId: actor.id,
+      actorName: actor.name,
+      kind: 'ability',
+      label: `✨ ${actor.name} mengaktifkan Efek ${card.rank}${getSuitSymbol(card.suit)} (${card.abilityLabel})`,
+    },
     activeAbility: {
       abilityType: card.specialAbility,
       sourceCard: card,
@@ -286,6 +300,15 @@ export function executeJackOpponentVsOpponentSwap(
     ...state,
     players: updatedPlayers,
     activeAbility: null,
+    lastTableMove: {
+      id: `move_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      actorId: actor.id,
+      actorName: actor.name,
+      kind: 'swap_card',
+      label: `Efek JACK: ${actor.name} menukar kartu ${firstPlayer.name} (#${firstTarget.slotIndex + 1}) & ${secondPlayer.name} (#${secondTarget.slotIndex + 1})`,
+      targetPlayerId: firstPlayer.id,
+      targetSlotIndex: firstTarget.slotIndex,
+    },
     actionLogs: [
       buildAbilityLog(
         actor.name,
@@ -343,6 +366,15 @@ export function executeSelfWithOpponentSwap(
     ...state,
     players: updatedPlayers,
     activeAbility: null,
+    lastTableMove: {
+      id: `move_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      actorId: actor.id,
+      actorName: actor.name,
+      kind: 'swap_card',
+      label: `${labelPrefix}: ${actor.name} menukar Slot #${ownSlotIndex + 1} dengan ${opponent.name} (#${opponentSlotIndex + 1})`,
+      targetPlayerId: actor.id,
+      targetSlotIndex: ownSlotIndex,
+    },
     actionLogs: [
       buildAbilityLog(
         actor.name,

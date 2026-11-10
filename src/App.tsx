@@ -1,19 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  BookOpen,
-  Flame,
-  Gamepad2,
-  Globe,
-  RefreshCw,
-  Shield,
-  Users,
-  Volume2,
-  VolumeX,
-} from 'lucide-react';
+import { LayoutGroup } from 'motion/react';
+import { Shield } from 'lucide-react';
 import { AbilityActionModal } from './components/AbilityActionModal';
+import { GameTopHud } from './components/GameTopHud';
 import { OnlineLobbyModal } from './components/OnlineLobbyModal';
 import { OvalTableArena } from './components/OvalTableArena';
-import { PlayingCard } from './components/PlayingCard';
 import { RulesQuickModal } from './components/RulesQuickModal';
 import { ShowdownModal } from './components/ShowdownModal';
 import { FocusedCardModal } from './components/table/FocusedCardModal';
@@ -283,15 +274,28 @@ export const App: React.FC<AppProps> = ({ autoOpenLobby = false }) => {
       return;
     }
 
+    const isHoldingCard =
+      gameState.turnSubPhase === 'holding_deck_card' ||
+      gameState.turnSubPhase === 'selecting_hand_slot_for_discard_swap';
+
+    const stepDelay = isHoldingCard ? 1150 : 900;
+
     const timer = window.setTimeout(() => {
       setGameState((prev) => {
         const next = executeSmartBotTurn(prev);
         if (next.turnSubPhase !== prev.turnSubPhase) {
-          playCardSlideSound();
+          if (
+            next.turnSubPhase === 'holding_deck_card' ||
+            next.turnSubPhase === 'selecting_hand_slot_for_discard_swap'
+          ) {
+            playCardSlideSound();
+          } else {
+            playCardSnapSound();
+          }
         }
         return next;
       });
-    }, 950);
+    }, stepDelay);
 
     return () => window.clearTimeout(timer);
   }, [roomRole, activePlayer, gameState.turnSubPhase, gameState.isRoundOver]);
@@ -425,323 +429,240 @@ export const App: React.FC<AppProps> = ({ autoOpenLobby = false }) => {
     gameState.turnSubPhase === 'holding_deck_card' &&
     Boolean(gameState.drawnCardBuffer);
 
-  const isViewerSelectingSlotSwap =
-    isViewerActiveHuman &&
-    gameState.turnSubPhase === 'selecting_hand_slot_for_discard_swap' &&
-    Boolean(gameState.drawnCardBuffer);
+  const announcerText = useMemo(() => {
+    if (gameState.isRoundOver) {
+      return 'Ronde selesai! Semua kartu dibuka';
+    }
+    if (gameState.turnSubPhase === 'reflex_matching_window') {
+      return `Jeda Refleks! Punya angka ${topDiscard?.rank ?? ''}? Ketuk kartumu cepat!`;
+    }
+    if (isViewerActiveHuman) {
+      if (gameState.turnSubPhase === 'awaiting_draw_or_qobul') {
+        return 'Giliranmu! Ketuk Dek / Buangan di tengah meja, atau Teriak QOBUL!';
+      }
+      if (gameState.turnSubPhase === 'holding_deck_card') {
+        return 'Kartu diambil! Pilih Tukar ke Matriks 2×2 atau Buang';
+      }
+      if (
+        gameState.turnSubPhase === 'selecting_hand_slot_for_discard_swap'
+      ) {
+        return 'Ketuk salah satu dari 4 kartumu di meja untuk menaruh kartu baru!';
+      }
+      if (gameState.turnSubPhase === 'executing_special_ability') {
+        return 'Kartu Sakti aktif! Ikuti petunjuk di layar';
+      }
+    }
+    if (gameState.lastTableMove) {
+      return gameState.lastTableMove.label;
+    }
+    return `Giliran ${activePlayer?.name ?? 'Lawan'} sedang bermain...`;
+  }, [
+    gameState.isRoundOver,
+    gameState.turnSubPhase,
+    gameState.lastTableMove,
+    topDiscard?.rank,
+    isViewerActiveHuman,
+    activePlayer?.name,
+  ]);
 
   return (
-    <div className="min-h-[100dvh] canvas-vignette text-slate-900 px-2.5 py-2.5 sm:px-6 sm:py-4 overflow-x-hidden">
-      <div className="max-w-7xl mx-auto space-y-2.5 sm:space-y-3.5">
-        <header className="flex flex-wrap items-center justify-between gap-2.5 bg-white/95 border border-slate-200/90 shadow-[0_8px_24px_rgba(15,23,42,0.08)] rounded-2xl sm:rounded-full px-3.5 py-2.5 sm:px-5 backdrop-blur-md">
-          <div className="flex items-center gap-2">
-            <span className="w-7 h-7 rounded-xl bg-emerald-600 text-white font-display font-black text-xs flex items-center justify-center shadow-sm">
-              Q
-            </span>
-            <span className="font-display font-extrabold text-base sm:text-lg text-slate-900 tracking-tight">
-              QOBUL
-            </span>
-            <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-extrabold text-xs">
-              Ronde #{gameState.roundNumber}
-            </span>
-            {roomRole !== 'offline' && (
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-800 font-extrabold text-xs">
-                Room {roomCode} ({roomMembers.length}P)
-              </span>
-            )}
-          </div>
+    <LayoutGroup>
+      <div className="min-h-[100dvh] canvas-vignette text-slate-900 px-2.5 py-2.5 sm:px-5 sm:py-3.5 overflow-x-hidden">
+        <div className="max-w-7xl mx-auto space-y-2.5 sm:space-y-3">
+          <GameTopHud
+            roundNumber={gameState.roundNumber}
+            roomRole={roomRole}
+            roomCode={roomCode}
+            memberCount={roomMembers.length}
+            playerCount={playerCount}
+            isPassAndPlayMode={isPassAndPlayMode}
+            isMuted={isMuted}
+            announcerText={announcerText}
+            isViewerTurn={isViewerActiveHuman}
+            onOpenLobby={() => setIsLobbyOpen(true)}
+            onChangePlayerCount={(count) => handleDealNewSimulation(count)}
+            onTogglePassAndPlay={() => {
+              const nextMode = !isPassAndPlayMode;
+              setIsPassAndPlayMode(nextMode);
+              handleDealNewSimulation(playerCount, nextMode);
+            }}
+            onToggleMute={() => {
+              setIsMutedState((prev) => {
+                const next = !prev;
+                setSoundMuted(next);
+                return next;
+              });
+            }}
+            onOpenRules={() => setIsRulesOpen(true)}
+            onRestartRound={() => handleDealNewSimulation(playerCount)}
+          />
 
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-            <button
-              type="button"
-              onClick={() => setIsLobbyOpen(true)}
-              className={`btn-tactile px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-extrabold flex items-center gap-1.5 shadow-sm ${
-                roomRole !== 'offline'
-                  ? 'bg-emerald-500 text-white'
-                  : 'bg-sky-500 hover:bg-sky-400 text-white'
-              }`}
-            >
-              <Globe className="w-3.5 h-3.5" />
-              <span>
-                {roomRole !== 'offline' ? `Room ${roomCode}` : 'Mabar Online'}
-              </span>
-            </button>
+          <OvalTableArena
+            gameState={gameState}
+            viewerPlayerIndex={viewerPlayerIndex}
+            revealAllCards={false}
+            peekedSlotKey={null}
+            misfireSlotKey={misfireSlotKey}
+            reflexDurationMs={REFLEX_WINDOW_MS}
+            onSelectCardSlot={handleSelectCardSlot}
+            onSkipReflexWindow={() => dispatchAction({ kind: 'SKIP_REFLEX' })}
+            onDrawFromDeck={() => {
+              if (!isViewerActiveHuman) return;
+              playCardSlideSound();
+              dispatchAction({ kind: 'DRAW_DECK' });
+            }}
+            onDrawFromDiscard={() => {
+              if (!isViewerActiveHuman) return;
+              playCardSnapSound();
+              dispatchAction({ kind: 'DRAW_DISCARD' });
+            }}
+            onShoutQobul={() => {
+              if (!isViewerActiveHuman) return;
+              playQobulBuzzerSound();
+              dispatchAction({ kind: 'CALL_QOBUL' });
+            }}
+            onCancelSwapMode={() =>
+              dispatchAction({ kind: 'CANCEL_SWAP_MODE' })
+            }
+          />
+        </div>
 
-            {roomRole !== 'guest' && (
-              <div className="flex items-center bg-slate-100 border border-slate-200 rounded-full p-0.5">
-                {[3, 4, 5].map((count) => (
-                  <button
-                    key={count}
-                    type="button"
-                    onClick={() => handleDealNewSimulation(count)}
-                    className={`btn-tactile px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${
-                      playerCount === count
-                        ? 'bg-amber-400 text-slate-950 shadow-sm'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    <Users className="w-3 h-3" />
-                    <span>{count}P</span>
-                  </button>
-                ))}
+        <FocusedCardModal
+          card={gameState.drawnCardBuffer}
+          isOpen={isViewerHoldingDeckCard}
+          flipOnMount
+          onKeepAndSwap={() => {
+            playCardSlideSound();
+            dispatchAction({ kind: 'CHOOSE_SWAP_MODE' });
+          }}
+          onDiscardOrUseAbility={() => {
+            playCardSnapSound();
+            dispatchAction({ kind: 'DISCARD_DRAWN' });
+          }}
+        />
+
+        <OnlineLobbyModal
+          isOpen={isLobbyOpen}
+          role={roomRole}
+          roomCode={roomCode}
+          statusText={roomStatus}
+          playerName={playerName}
+          members={roomMembers}
+          totalSeats={playerCount}
+          onChangePlayerName={setPlayerName}
+          onCreateHostRoom={handleCreateHostRoom}
+          onJoinRoom={handleJoinRoom}
+          onStartOnlineMatch={() => handleDealNewSimulation(playerCount, false)}
+          onLeaveRoom={handleLeaveRoom}
+          onClose={() => setIsLobbyOpen(false)}
+        />
+
+        {isPrivacyCurtainActive && roomRole === 'offline' && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-lg p-4">
+            <div className="max-w-sm w-full rounded-3xl bg-slate-900 border-2 border-amber-400/50 p-7 text-center space-y-5 shadow-2xl">
+              <div className="w-14 h-14 rounded-2xl bg-amber-400/20 text-amber-300 border border-amber-400/40 flex items-center justify-center mx-auto">
+                <Shield className="w-7 h-7" />
               </div>
-            )}
 
-            {roomRole === 'offline' && (
+              <h2 className="font-display font-extrabold text-xl text-white">
+                Giliran {activePlayer?.name}
+              </h2>
+
               <button
                 type="button"
                 onClick={() => {
-                  const nextMode = !isPassAndPlayMode;
-                  setIsPassAndPlayMode(nextMode);
-                  handleDealNewSimulation(playerCount, nextMode);
+                  playCardSlideSound();
+                  setIsPrivacyCurtainActive(false);
                 }}
-                className={`btn-tactile px-3 py-1.5 rounded-full text-xs font-bold border flex items-center gap-1.5 ${
-                  isPassAndPlayMode
-                    ? 'bg-cyan-50 border-cyan-300 text-cyan-800'
-                    : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
-                }`}
+                className="btn-tactile w-full py-3 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-display font-extrabold text-sm shadow-lg"
               >
-                <Gamepad2 className="w-3.5 h-3.5 text-cyan-600" />
-                <span>{isPassAndPlayMode ? 'Pass & Play' : 'Vs Bots'}</span>
+                Mulai Giliran
               </button>
-            )}
-
-            <button
-              type="button"
-              onClick={() => {
-                if (!isViewerActiveHuman) return;
-                playQobulBuzzerSound();
-                dispatchAction({ kind: 'CALL_QOBUL' });
-              }}
-              disabled={
-                !isViewerActiveHuman ||
-                gameState.turnSubPhase !== 'awaiting_draw_or_qobul' ||
-                gameState.qobulCallerId !== null ||
-                gameState.isRoundOver
-              }
-              className="btn-tactile px-3.5 py-1.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold flex items-center gap-1.5 shadow-sm disabled:opacity-40"
-            >
-              <Flame className="w-3.5 h-3.5" />
-              <span>QOBUL!</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setIsMutedState((prev) => {
-                  const next = !prev;
-                  setSoundMuted(next);
-                  return next;
-                });
-              }}
-              aria-label={isMuted ? 'Nyalakan suara' : 'Matikan suara'}
-              className="btn-tactile p-2 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700"
-            >
-              {isMuted ? (
-                <VolumeX className="w-4 h-4 text-red-500" />
-              ) : (
-                <Volume2 className="w-4 h-4 text-emerald-600" />
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setIsRulesOpen(true)}
-              className="btn-tactile px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-xs font-bold text-slate-700 flex items-center gap-1.5"
-            >
-              <BookOpen className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Aturan</span>
-            </button>
-
-            {roomRole !== 'guest' && (
-              <button
-                type="button"
-                onClick={() => handleDealNewSimulation(playerCount)}
-                className="btn-tactile px-3 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>Ulang</span>
-              </button>
-            )}
-          </div>
-        </header>
-
-        {isViewerSelectingSlotSwap && gameState.drawnCardBuffer && (
-          <div className="flex items-center justify-center gap-3 bg-white/95 border border-slate-200 shadow-md rounded-full px-4 py-2 w-fit mx-auto">
-            <PlayingCard
-              layoutId={gameState.drawnCardBuffer.id}
-              card={gameState.drawnCardBuffer}
-              isFaceUp
-              size="sm"
-            />
-            <span className="px-3.5 py-1.5 rounded-full bg-amber-400 text-slate-950 font-display font-extrabold text-xs shadow-sm">
-              Ketuk Kartumu untuk Tukar
-            </span>
-            {gameState.drawnFromSource === 'deck' && (
-              <button
-                type="button"
-                onClick={() => dispatchAction({ kind: 'CANCEL_SWAP_MODE' })}
-                className="btn-tactile px-3 py-1.5 rounded-full bg-slate-200 hover:bg-slate-300 text-xs font-bold text-slate-800"
-              >
-                Batal
-              </button>
-            )}
+            </div>
           </div>
         )}
 
-        <OvalTableArena
-          gameState={gameState}
-          viewerPlayerIndex={viewerPlayerIndex}
-          revealAllCards={false}
-          peekedSlotKey={null}
-          misfireSlotKey={misfireSlotKey}
-          reflexDurationMs={REFLEX_WINDOW_MS}
-          onSelectCardSlot={handleSelectCardSlot}
-          onSkipReflexWindow={() => dispatchAction({ kind: 'SKIP_REFLEX' })}
-          onDrawFromDeck={() => {
-            if (!isViewerActiveHuman) return;
+        <RulesQuickModal
+          isOpen={isRulesOpen}
+          onClose={() => setIsRulesOpen(false)}
+          sampleCards={sampleRuleCards}
+          blunderPenalty={blunderPenalty}
+        />
+
+        <AbilityActionModal
+          isOpen={
+            isViewerActiveHuman &&
+            gameState.turnSubPhase === 'executing_special_ability'
+          }
+          activeAbility={gameState.activeAbility}
+          activePlayer={activePlayer}
+          allPlayers={gameState.players}
+          onTriggerPeekOwn={(slotIndex) => {
+            playPeekSound();
+            dispatchAction({ kind: 'PEEK_OWN', slotIndex });
+          }}
+          onTriggerPeekOpponent={(targetPlayerId, slotIndex) => {
+            playPeekSound();
+            dispatchAction({
+              kind: 'PEEK_OPPONENT',
+              targetPlayerId,
+              slotIndex,
+            });
+          }}
+          onFinishPeek={() => {
             playCardSlideSound();
-            dispatchAction({ kind: 'DRAW_DECK' });
+            dispatchAction({ kind: 'FINISH_PEEK' });
           }}
-          onDrawFromDiscard={() => {
-            if (!isViewerActiveHuman) return;
+          onExecuteJackSwap={(target1, target2) => {
             playCardSnapSound();
-            dispatchAction({ kind: 'DRAW_DISCARD' });
+            dispatchAction({ kind: 'JACK_SWAP', target1, target2 });
           }}
+          onExecuteQueenSwap={(ownSlotIndex, opponentId, opponentSlotIndex) => {
+            playCardSnapSound();
+            dispatchAction({
+              kind: 'QUEEN_SWAP',
+              ownSlotIndex,
+              opponentId,
+              opponentSlotIndex,
+            });
+          }}
+          onExecuteKingSwap={(
+            ownSlotIndex,
+            opponentId,
+            opponentSlotIndex,
+            wasPeeked
+          ) => {
+            playCardSnapSound();
+            dispatchAction({
+              kind: 'KING_SWAP',
+              ownSlotIndex,
+              opponentId,
+              opponentSlotIndex,
+              wasPeeked,
+            });
+          }}
+          onSkipKingSwap={() => dispatchAction({ kind: 'SKIP_KING_SWAP' })}
+        />
+
+        <ShowdownModal
+          isOpen={gameState.isRoundOver}
+          gameState={gameState}
+          onStartNextRound={() => {
+            if (roomRole === 'guest') return;
+            setMisfireSlotKey(null);
+            playCardSlideSound();
+            setGameState((prev) =>
+              createInitialGameState(
+                prev.config,
+                prev.players,
+                prev.roundNumber + 1
+              )
+            );
+          }}
+          onResetGame={() => handleDealNewSimulation(playerCount)}
         />
       </div>
-
-      <FocusedCardModal
-        card={gameState.drawnCardBuffer}
-        isOpen={isViewerHoldingDeckCard}
-        flipOnMount
-        onKeepAndSwap={() => {
-          playCardSlideSound();
-          dispatchAction({ kind: 'CHOOSE_SWAP_MODE' });
-        }}
-        onDiscardOrUseAbility={() => {
-          playCardSnapSound();
-          dispatchAction({ kind: 'DISCARD_DRAWN' });
-        }}
-      />
-
-      <OnlineLobbyModal
-        isOpen={isLobbyOpen}
-        role={roomRole}
-        roomCode={roomCode}
-        statusText={roomStatus}
-        playerName={playerName}
-        members={roomMembers}
-        totalSeats={playerCount}
-        onChangePlayerName={setPlayerName}
-        onCreateHostRoom={handleCreateHostRoom}
-        onJoinRoom={handleJoinRoom}
-        onStartOnlineMatch={() => handleDealNewSimulation(playerCount, false)}
-        onLeaveRoom={handleLeaveRoom}
-        onClose={() => setIsLobbyOpen(false)}
-      />
-
-      {isPrivacyCurtainActive && roomRole === 'offline' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-lg p-4">
-          <div className="max-w-sm w-full rounded-3xl bg-slate-900 border-2 border-amber-400/50 p-7 text-center space-y-5 shadow-2xl">
-            <div className="w-14 h-14 rounded-2xl bg-amber-400/20 text-amber-300 border border-amber-400/40 flex items-center justify-center mx-auto">
-              <Shield className="w-7 h-7" />
-            </div>
-
-            <h2 className="font-display font-extrabold text-xl text-white">
-              Giliran {activePlayer?.name}
-            </h2>
-
-            <button
-              type="button"
-              onClick={() => {
-                playCardSlideSound();
-                setIsPrivacyCurtainActive(false);
-              }}
-              className="btn-tactile w-full py-3 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-display font-extrabold text-sm shadow-lg"
-            >
-              Mulai Giliran
-            </button>
-          </div>
-        </div>
-      )}
-
-      <RulesQuickModal
-        isOpen={isRulesOpen}
-        onClose={() => setIsRulesOpen(false)}
-        sampleCards={sampleRuleCards}
-        blunderPenalty={blunderPenalty}
-      />
-
-      <AbilityActionModal
-        isOpen={
-          isViewerActiveHuman &&
-          gameState.turnSubPhase === 'executing_special_ability'
-        }
-        activeAbility={gameState.activeAbility}
-        activePlayer={activePlayer}
-        allPlayers={gameState.players}
-        onTriggerPeekOwn={(slotIndex) => {
-          playPeekSound();
-          dispatchAction({ kind: 'PEEK_OWN', slotIndex });
-        }}
-        onTriggerPeekOpponent={(targetPlayerId, slotIndex) => {
-          playPeekSound();
-          dispatchAction({ kind: 'PEEK_OPPONENT', targetPlayerId, slotIndex });
-        }}
-        onFinishPeek={() => {
-          playCardSlideSound();
-          dispatchAction({ kind: 'FINISH_PEEK' });
-        }}
-        onExecuteJackSwap={(target1, target2) => {
-          playCardSnapSound();
-          dispatchAction({ kind: 'JACK_SWAP', target1, target2 });
-        }}
-        onExecuteQueenSwap={(ownSlotIndex, opponentId, opponentSlotIndex) => {
-          playCardSnapSound();
-          dispatchAction({
-            kind: 'QUEEN_SWAP',
-            ownSlotIndex,
-            opponentId,
-            opponentSlotIndex,
-          });
-        }}
-        onExecuteKingSwap={(
-          ownSlotIndex,
-          opponentId,
-          opponentSlotIndex,
-          wasPeeked
-        ) => {
-          playCardSnapSound();
-          dispatchAction({
-            kind: 'KING_SWAP',
-            ownSlotIndex,
-            opponentId,
-            opponentSlotIndex,
-            wasPeeked,
-          });
-        }}
-        onSkipKingSwap={() => dispatchAction({ kind: 'SKIP_KING_SWAP' })}
-      />
-
-      <ShowdownModal
-        isOpen={gameState.isRoundOver}
-        gameState={gameState}
-        onStartNextRound={() => {
-          if (roomRole === 'guest') return;
-          setMisfireSlotKey(null);
-          playCardSlideSound();
-          setGameState((prev) =>
-            createInitialGameState(
-              prev.config,
-              prev.players,
-              prev.roundNumber + 1
-            )
-          );
-        }}
-        onResetGame={() => handleDealNewSimulation(playerCount)}
-      />
-    </div>
+    </LayoutGroup>
   );
 };
 

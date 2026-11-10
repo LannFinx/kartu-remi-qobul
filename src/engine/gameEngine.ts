@@ -264,8 +264,8 @@ export function drawFromDeckPile(state: GameState): GameState {
     return evaluateRoundShowdown(state);
   }
 
-  const drawnCard = nextDraw[0];
-  const remainingDeck = nextDraw.slice(1);
+  const drawnCard = nextDraw[nextDraw.length - 1];
+  const remainingDeck = nextDraw.slice(0, -1);
   const actor = state.players[state.currentPlayerIndex];
 
   return {
@@ -275,6 +275,13 @@ export function drawFromDeckPile(state: GameState): GameState {
     drawnCardBuffer: drawnCard,
     drawnFromSource: 'deck',
     turnSubPhase: 'holding_deck_card',
+    lastTableMove: {
+      id: `move_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      actorId: actor.id,
+      actorName: actor.name,
+      kind: 'draw_deck',
+      label: `${actor.name} mengambil kartu dari Dek`,
+    },
     actionLogs: [
       createLogEntry(actor.name, 'Mengambil 1 kartu dari Draw Pile.', 'normal'),
       ...state.actionLogs,
@@ -301,6 +308,13 @@ export function drawFromDiscardPile(state: GameState): GameState {
     drawnCardBuffer: topDiscard,
     drawnFromSource: 'discard',
     turnSubPhase: 'selecting_hand_slot_for_discard_swap',
+    lastTableMove: {
+      id: `move_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      actorId: actor.id,
+      actorName: actor.name,
+      kind: 'draw_discard',
+      label: `${actor.name} mengambil ${topDiscard.rank}${getSuitSymbol(topDiscard.suit)} dari Buangan`,
+    },
     actionLogs: [
       createLogEntry(
         actor.name,
@@ -372,6 +386,15 @@ export function attemptReflexCardSlam(
       ...state,
       players: updatedPlayers,
       discardPile: [...state.discardPile, targetSlot.card],
+      lastTableMove: {
+        id: `move_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        actorId: player.id,
+        actorName: player.name,
+        kind: 'slam_match',
+        label: `⚡ ${player.name} buang cepat kembar ${targetSlot.card.rank}${getSuitSymbol(targetSlot.card.suit)}!`,
+        targetPlayerId: player.id,
+        targetSlotIndex: slotIndex,
+      },
       lastReflexVerdict: {
         id: `${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         actorName: player.name,
@@ -396,8 +419,8 @@ export function attemptReflexCardSlam(
     state.discardPile
   );
 
-  const penaltyCard = nextDraw[0];
-  const remainingDeck = penaltyCard ? nextDraw.slice(1) : nextDraw;
+  const penaltyCard = nextDraw[nextDraw.length - 1];
+  const remainingDeck = penaltyCard ? nextDraw.slice(0, -1) : nextDraw;
 
   const updatedPlayers = state.players.map((p) => {
     if (p.id !== player.id) return p;
@@ -426,6 +449,15 @@ export function attemptReflexCardSlam(
     players: updatedPlayers,
     drawPile: remainingDeck,
     discardPile: nextDiscard,
+    lastTableMove: {
+      id: `move_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      actorId: player.id,
+      actorName: player.name,
+      kind: 'slam_penalty',
+      label: `🔥 ${player.name} salah tebak! +1 Kartu Penalti`,
+      targetPlayerId: player.id,
+      targetSlotIndex: slotIndex,
+    },
     lastReflexVerdict: {
       id: `${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       actorName: player.name,
@@ -474,6 +506,15 @@ export function swapDrawnCardWithHandSlot(
     discardPile: [...state.discardPile, oldCard],
     drawnCardBuffer: null,
     drawnFromSource: null,
+    lastTableMove: {
+      id: `move_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      actorId: actor.id,
+      actorName: actor.name,
+      kind: 'swap_card',
+      label: `${actor.name} menaruh kartu ke Slot #${slotIndex + 1} & membuang ${oldCard.rank}${getSuitSymbol(oldCard.suit)}`,
+      targetPlayerId: actor.id,
+      targetSlotIndex: slotIndex,
+    },
     actionLogs: [
       createLogEntry(
         actor.name,

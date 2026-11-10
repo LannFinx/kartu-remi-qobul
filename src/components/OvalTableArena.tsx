@@ -1,4 +1,5 @@
 import React from 'react';
+import { X } from 'lucide-react';
 import { GameState } from '../types/game';
 import { CenterDeckHub } from './CenterDeckHub';
 import { PlayerSeat } from './PlayerSeat';
@@ -15,6 +16,8 @@ interface OvalTableArenaProps {
   onSkipReflexWindow?: () => void;
   onDrawFromDeck?: () => void;
   onDrawFromDiscard?: () => void;
+  onShoutQobul?: () => void;
+  onCancelSwapMode?: () => void;
 }
 
 export const OvalTableArena: React.FC<OvalTableArenaProps> = ({
@@ -28,6 +31,8 @@ export const OvalTableArena: React.FC<OvalTableArenaProps> = ({
   onSkipReflexWindow,
   onDrawFromDeck,
   onDrawFromDiscard,
+  onShoutQobul,
+  onCancelSwapMode,
 }) => {
   const {
     players,
@@ -36,8 +41,11 @@ export const OvalTableArena: React.FC<OvalTableArenaProps> = ({
     finalTurnsQueue,
     drawPile,
     discardPile,
+    drawnCardBuffer,
+    drawnFromSource,
     turnSubPhase,
     lastReflexVerdict,
+    lastTableMove,
   } = gameState;
 
   const total = players.length;
@@ -64,13 +72,17 @@ export const OvalTableArena: React.FC<OvalTableArenaProps> = ({
   const canHumanDraw =
     isViewerActiveTurn && turnSubPhase === 'awaiting_draw_or_qobul';
 
+  const canHumanShoutQobul =
+    canHumanDraw && qobulCallerId === null && !gameState.isRoundOver;
+
   const isReflexPhase = turnSubPhase === 'reflex_matching_window';
 
   const renderSeat = (playerIndex: number, isMainBottom = false) => {
     const player = players[playerIndex];
     if (!player) return null;
 
-    const isActive = currentPlayerIndex === playerIndex && !gameState.isRoundOver;
+    const isActive =
+      currentPlayerIndex === playerIndex && !gameState.isRoundOver;
     const isDimmed = !isActive && !isReflexPhase && !gameState.isRoundOver;
 
     const isWaitingForSlotSwap =
@@ -85,20 +97,63 @@ export const OvalTableArena: React.FC<OvalTableArenaProps> = ({
       isReflexPhase &&
       !gameState.isRoundOver;
 
+    const isViewerHoldingModal =
+      isActive &&
+      playerIndex === safeViewerIdx &&
+      !player.isBot &&
+      turnSubPhase === 'holding_deck_card';
+
+    const showHeldCardNextToSeat =
+      isActive && Boolean(drawnCardBuffer) && !isViewerHoldingModal;
+
+    const recentlySwappedSlotIndex =
+      lastTableMove?.kind === 'swap_card' &&
+      lastTableMove.targetPlayerId === player.id &&
+      lastTableMove.targetSlotIndex !== undefined
+        ? lastTableMove.targetSlotIndex
+        : null;
+
+    const seatActionText =
+      lastTableMove && lastTableMove.actorId === player.id
+        ? lastTableMove.label
+        : null;
+
     return (
-      <PlayerSeat
-        key={player.id}
-        player={player}
-        isMainBottomSeat={isMainBottom}
-        isActiveTurn={isActive}
-        isDimmed={isDimmed}
-        isQobulCaller={qobulCallerId === player.id}
-        revealAllCards={revealAllCards}
-        peekedSlotKey={peekedSlotKey}
-        misfireSlotKey={misfireSlotKey}
-        selectableSlots={isWaitingForSlotSwap || canSlamDuringReflex}
-        onSelectSlot={onSelectCardSlot}
-      />
+      <div className="flex flex-col items-center gap-2">
+        <PlayerSeat
+          key={player.id}
+          player={player}
+          isMainBottomSeat={isMainBottom}
+          isActiveTurn={isActive}
+          isDimmed={isDimmed}
+          isQobulCaller={qobulCallerId === player.id}
+          revealAllCards={revealAllCards}
+          peekedSlotKey={peekedSlotKey}
+          misfireSlotKey={misfireSlotKey}
+          selectableSlots={isWaitingForSlotSwap || canSlamDuringReflex}
+          activeHeldCard={showHeldCardNextToSeat ? drawnCardBuffer : null}
+          activeHeldSource={showHeldCardNextToSeat ? drawnFromSource : null}
+          recentlySwappedSlotIndex={recentlySwappedSlotIndex}
+          seatActionText={seatActionText}
+          canShoutQobul={isMainBottom && canHumanShoutQobul}
+          onShoutQobul={onShoutQobul}
+          onSelectSlot={onSelectCardSlot}
+        />
+
+        {isMainBottom &&
+          isWaitingForSlotSwap &&
+          drawnFromSource === 'deck' &&
+          onCancelSwapMode && (
+            <button
+              type="button"
+              onClick={onCancelSwapMode}
+              className="btn-tactile px-3.5 py-1 rounded-full bg-black/45 hover:bg-black/60 border border-white/20 text-white text-xs font-extrabold inline-flex items-center gap-1"
+            >
+              <X className="w-3.5 h-3.5" />
+              <span>Batal Tukar</span>
+            </button>
+          )}
+      </div>
     );
   };
 
@@ -152,7 +207,7 @@ export const OvalTableArena: React.FC<OvalTableArenaProps> = ({
           />
 
           <CenterDeckHub
-            drawPileCount={drawPile.length}
+            drawPile={drawPile}
             discardPile={discardPile}
             canDrawFromDeck={Boolean(canHumanDraw)}
             canDrawFromDiscard={Boolean(canHumanDraw && discardPile.length > 0)}

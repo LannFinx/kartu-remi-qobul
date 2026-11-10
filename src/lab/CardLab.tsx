@@ -47,17 +47,25 @@ export const CardLab: React.FC<CardLabProps> = ({
 
   return (
     <main className="min-h-[100dvh] flex flex-col items-center justify-between canvas-vignette text-slate-900 px-2.5 py-2.5 sm:px-6 sm:py-4 overflow-x-hidden">
-      <header className="w-full max-w-4xl flex flex-wrap items-center justify-between gap-2 bg-white/95 border border-slate-200/90 shadow-[0_8px_24px_rgba(15,23,42,0.08)] rounded-2xl sm:rounded-full px-3.5 py-2 sm:px-5 sm:py-2.5">
-        <div className="flex items-center gap-2">
-          <span className="w-7 h-7 rounded-xl bg-emerald-600 text-white font-display font-black text-xs flex items-center justify-center shadow-sm">
-            Q
-          </span>
-          <span className="font-display font-extrabold text-sm sm:text-base tracking-tight text-slate-900">
-            QOBUL
-          </span>
-          <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px] uppercase tracking-wider">
-            Mode Latihan
-          </span>
+      <header className="w-full max-w-4xl flex flex-wrap items-center justify-between gap-2">
+        <div className="inline-flex items-center gap-2.5 bg-gradient-to-b from-[#1e6f43] to-[#114227] border-2 border-amber-300 border-b-[4px] border-b-amber-600 rounded-2xl px-3.5 py-1.5 shadow-[0_6px_16px_rgba(15,23,42,0.16)] text-white select-none">
+          <div className="relative w-7 h-7 flex items-center justify-center">
+            <span className="absolute -rotate-12 -translate-x-1 w-4 h-5 rounded-[3px] bg-white border border-slate-300 shadow text-[9px] font-black text-red-600 flex items-center justify-center">
+              K♥
+            </span>
+            <span className="absolute rotate-12 translate-x-1 w-4 h-5 rounded-[3px] bg-amber-300 border border-amber-600 shadow text-[9px] font-black text-slate-950 flex items-center justify-center">
+              A♠
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="font-display font-black text-base sm:text-lg tracking-tight text-white drop-shadow-[0_2px_0_rgba(0,0,0,0.45)]">
+              Ahnap<span className="text-amber-300">Qobul</span>
+            </span>
+            <span className="px-2 py-0.5 rounded-lg bg-amber-400 text-slate-950 font-display font-black text-[10px] uppercase">
+              Latihan
+            </span>
+          </div>
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
@@ -67,7 +75,7 @@ export const CardLab: React.FC<CardLabProps> = ({
               playCardSlideSound();
               dispatch({ type: 'reset' });
             }}
-            className={`${pillButton} bg-slate-100 hover:bg-slate-200 text-slate-700 inline-flex items-center gap-1.5`}
+            className={`${pillButton} bg-slate-900 border-2 border-slate-700 border-b-[4px] border-b-slate-950 text-white inline-flex items-center gap-1.5 shadow-md`}
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Ulang</span>
@@ -76,7 +84,7 @@ export const CardLab: React.FC<CardLabProps> = ({
             <button
               type="button"
               onClick={onOpenOnlineLobby}
-              className={`${pillButton} bg-sky-500 text-white hover:bg-sky-400 shadow-sm inline-flex items-center gap-1.5`}
+              className={`${pillButton} bg-gradient-to-b from-sky-400 to-sky-600 border-2 border-sky-200 border-b-[4px] border-b-sky-800 text-white shadow-md inline-flex items-center gap-1.5`}
             >
               <Globe className="w-3.5 h-3.5" />
               <span>Mabar Online</span>
@@ -86,7 +94,7 @@ export const CardLab: React.FC<CardLabProps> = ({
             <button
               type="button"
               onClick={onOpenFullTable}
-              className={`${pillButton} bg-amber-400 text-slate-950 hover:bg-amber-300 shadow-sm inline-flex items-center gap-1.5`}
+              className={`${pillButton} bg-gradient-to-b from-amber-300 to-amber-500 border-2 border-amber-100 border-b-[4px] border-b-amber-700 text-slate-950 shadow-md inline-flex items-center gap-1.5`}
             >
               <Users className="w-3.5 h-3.5" />
               <span>Meja 4 Pemain</span>
