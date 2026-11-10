@@ -1,0 +1,153 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-canvas: #F4F6F9;
+  --table-felt: #17613a;
+  --table-felt-highlight: #23804f;
+  --table-felt-deep: #0c3d24;
+  --accent-gold: #F59E0B;
+  --accent-gold-glow: rgba(245, 158, 11, 0.35);
+  --accent-cyan: #06B6D4;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --card-bg: #FAF7F0;
+  --card-back: #111A2E;
+  --danger-red: #DC2626;
+  --ease-out-expo: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-quint: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@layer utilities {
+  .perspective-stage {
+    perspective: 1200px;
+  }
+
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+
+  .corner-lift-peek {
+    transform: perspective(800px) rotateX(16deg) rotateY(-12deg) translateZ(14px) scale(1.03);
+  }
+
+  .felt-radial-surface {
+    background:
+      radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.04) 0%, transparent 60%),
+      radial-gradient(
+        ellipse at center,
+        var(--table-felt-highlight) 0%,
+        var(--table-felt) 55%,
+        var(--table-felt-deep) 100%
+      );
+  }
+
+  .canvas-vignette {
+    background: radial-gradient(
+      circle at 50% 0%,
+      #FFFFFF 0%,
+      #F1F5F9 65%,
+      #E2E8F0 100%
+    );
+  }
+
+  .card-paper-surface {
+    background: linear-gradient(165deg, #FFFDF9 0%, #F7F3E8 60%, #EFE9D8 100%);
+  }
+
+  .card-red-king-surface {
+    background: linear-gradient(165deg, #FFFDF9 0%, #FEF2F2 55%, #FDE68A 140%);
+  }
+
+  .card-black-king-surface {
+    background: linear-gradient(165deg, #F8FAFC 0%, #E2E8F0 65%, #CBD5E1 100%);
+  }
+
+  .card-transition {
+    transition:
+      transform 200ms var(--ease-out-expo),
+      box-shadow 200ms var(--ease-out-expo),
+      opacity 180ms var(--ease-out-expo);
+  }
+
+  .btn-tactile {
+    transition:
+      transform 150ms var(--ease-out-expo),
+      background-color 150ms ease,
+      box-shadow 150ms var(--ease-out-expo),
+      opacity 150ms ease;
+  }
+
+  .btn-tactile:active:not(:disabled) {
+    transform: scale(0.96);
+  }
+
+  .modal-enter {
+    animation: modalScaleIn 220ms var(--ease-out-expo) forwards;
+  }
+
+  .backdrop-enter {
+    animation: backdropFadeIn 180ms ease-out forwards;
+  }
+
+  .card-draw-enter {
+    animation: cardDrawFlight 340ms var(--ease-drawer) forwards;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card-selectable:hover:not(:disabled) {
+    transform: translateY(-6px) scale(1.02);
+  }
+}
+
+@keyframes modalScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes cardDrawFlight {
+  from {
+    opacity: 0;
+    transform: translateY(-28px) scale(0.88) rotateX(18deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotateX(0deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-transition,
+  .btn-tactile,
+  .modal-enter,
+  .card-draw-enter {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
