@@ -12,8 +12,8 @@ import {
 } from 'lucide-react';
 import { createStandardDeck } from '../engine/deck';
 import {
-  playCardFlipSound,
   playCardSlideSound,
+  playCardSnapSound,
   setSoundMuted,
 } from '../engine/soundEffects';
 import { PlayingCard } from './PlayingCard';
@@ -92,7 +92,7 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
     SHOWCASE_CARDS[0];
 
   const handleToggleCard = (id: string) => {
-    playCardFlipSound();
+    playCardSnapSound();
     setSelectedCardId(id);
     setFlippedIds((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
