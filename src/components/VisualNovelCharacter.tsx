@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { ChevronRight, Play, RotateCcw, Sparkles } from 'lucide-react';
+import { ArrowRight, Play, RotateCcw } from 'lucide-react';
 
 export type VnMood =
   | 'happy'
@@ -23,15 +23,6 @@ interface VisualNovelBannerProps {
   onFinishToGame?: () => void;
   onRestartTutorial?: () => void;
 }
-
-const MOOD_BADGE: Record<VnMood, { label: string; color: string }> = {
-  happy: { label: 'Alya • Bandar Qobul', color: 'bg-emerald-400 text-slate-950' },
-  excited: { label: 'Alya • Semangat!', color: 'bg-amber-400 text-slate-950' },
-  wink: { label: 'Alya • Tips Rahasia', color: 'bg-sky-400 text-slate-950' },
-  serious: { label: 'Alya • Fokus Hafalan', color: 'bg-purple-300 text-slate-950' },
-  shocked: { label: 'Alya • Awas Refleks!', color: 'bg-rose-400 text-slate-950' },
-  proud: { label: 'Alya • Master Qobul!', color: 'bg-amber-300 text-slate-950' },
-};
 
 const DealerAvatarSvg: React.FC<{ mood: VnMood }> = ({ mood }) => {
   return (
@@ -82,7 +73,6 @@ const DealerAvatarSvg: React.FC<{ mood: VnMood }> = ({ mood }) => {
       <circle cx="60" cy="92" r="2.2" fill="#fbbf24" />
 
       <rect x="54" y="73" width="12" height="14" rx="5" fill="#fde68a" />
-
       <ellipse cx="60" cy="56" rx="24" ry="25" fill="#fef3c7" />
 
       <ellipse cx="44" cy="61" rx="4.5" ry="2.5" fill="#fda4af" opacity="0.75" />
@@ -229,94 +219,81 @@ export const VisualNovelBanner: React.FC<VisualNovelBannerProps> = ({
   onFinishToGame,
   onRestartTutorial,
 }) => {
-  const badge = MOOD_BADGE[mood];
-
   return (
-    <motion.div
+    <motion.aside
       key={`vn_step_${stepNumber}`}
-      initial={{ opacity: 0, y: 10, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ type: 'spring', visualDuration: 0.28, bounce: 0.22 }}
-      className="w-full max-w-3xl rounded-3xl bg-slate-900/95 border-2 border-amber-300 border-b-[5px] border-b-amber-600 shadow-[0_14px_34px_rgba(15,23,42,0.28)] px-3.5 py-3 sm:px-5 sm:py-4 text-white flex flex-col sm:flex-row items-center gap-3.5 sm:gap-4"
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
+      className="w-full max-w-2xl rounded-2xl bg-white border border-slate-200/90 shadow-sm px-4 py-3 text-slate-800 flex items-center gap-3.5"
     >
-      <motion.div
-        animate={{ y: [0, -3, 0] }}
-        transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }}
-        className="w-20 h-20 sm:w-24 sm:h-24 shrink-0"
-      >
+      <div className="w-14 h-14 sm:w-16 sm:h-16 shrink-0">
         <DealerAvatarSvg mood={mood} />
-      </motion.div>
+      </div>
 
-      <div className="flex-1 flex flex-col gap-1.5 text-center sm:text-left">
-        <div className="flex flex-wrap items-center justify-center sm:justify-between gap-2">
-          <div className="inline-flex items-center gap-2">
-            <span
-              className={`px-2.5 py-0.5 rounded-full font-display font-black text-[10px] uppercase tracking-wider shadow-sm ${badge.color}`}
-            >
-              {badge.label}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between gap-2 mb-0.5">
+          <div className="flex items-center gap-2 truncate">
+            <span className="font-display font-black text-xs text-slate-900">
+              Alya
             </span>
-            <span className="font-display font-extrabold text-xs sm:text-sm text-amber-300">
+            <span className="text-[11px] font-semibold text-slate-400">
               {title}
             </span>
           </div>
 
-          <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-[10px] font-extrabold text-white/80 tabular-nums">
-            Chapter {stepNumber}/{totalSteps}
+          <span className="text-[10px] font-bold text-slate-400 tabular-nums shrink-0">
+            {stepNumber}/{totalSteps}
           </span>
         </div>
 
-        <p className="text-xs sm:text-sm text-slate-100 font-medium leading-relaxed">
+        <p className="text-xs sm:text-[13px] text-slate-700 font-normal leading-snug line-clamp-2 sm:line-clamp-none">
           {dialogue}
         </p>
 
-        <div className="flex flex-wrap items-center justify-center sm:justify-between gap-2 pt-1">
-          {actionHint ? (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/20 border border-amber-300/50 text-amber-200 font-display font-extrabold text-[11px]">
-              <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-              <span>{actionHint}</span>
-            </span>
-          ) : (
-            <span />
-          )}
+        {actionHint && (
+          <div className="mt-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md w-fit">
+            <span>👉</span>
+            <span>{actionHint}</span>
+          </div>
+        )}
+      </div>
 
-          <div className="flex items-center gap-2">
-            {canAdvanceNext && onNextStep && (
+      <div className="shrink-0 flex items-center gap-1.5">
+        {canAdvanceNext && onNextStep && (
+          <button
+            type="button"
+            onClick={onNextStep}
+            className="btn-tactile h-8 px-3 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs inline-flex items-center gap-1 shadow-xs hover:bg-amber-300"
+          >
+            <span>{nextButtonLabel}</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        )}
+
+        {stepNumber >= totalSteps && onFinishToGame && (
+          <div className="flex items-center gap-1">
+            {onRestartTutorial && (
               <button
                 type="button"
-                onClick={onNextStep}
-                className="btn-tactile h-9 px-4 rounded-xl bg-gradient-to-b from-amber-300 to-amber-500 border-2 border-amber-100 border-b-[3px] border-b-amber-700 text-slate-950 font-display font-black text-xs shadow-md inline-flex items-center gap-1"
+                onClick={onRestartTutorial}
+                aria-label="Ulangi Tutorial"
+                className="btn-tactile h-8 w-8 rounded-lg border border-slate-200 text-slate-600 flex items-center justify-center hover:bg-slate-50"
               >
-                <span>{nextButtonLabel}</span>
-                <ChevronRight className="w-4 h-4" />
+                <RotateCcw className="w-3.5 h-3.5" />
               </button>
             )}
-
-            {stepNumber >= totalSteps && onFinishToGame && (
-              <>
-                {onRestartTutorial && (
-                  <button
-                    type="button"
-                    onClick={onRestartTutorial}
-                    className="btn-tactile h-9 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-display font-bold text-xs inline-flex items-center gap-1"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Ulangi</span>
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={onFinishToGame}
-                  className="btn-tactile h-9 px-4 rounded-xl bg-gradient-to-b from-emerald-400 to-emerald-600 border-2 border-emerald-200 border-b-[3px] border-b-emerald-800 text-slate-950 font-display font-black text-xs shadow-md inline-flex items-center gap-1.5"
-                >
-                  <Play className="w-3.5 h-3.5 fill-slate-950" />
-                  <span>Main Lawan Bot!</span>
-                </button>
-              </>
-            )}
+            <button
+              type="button"
+              onClick={onFinishToGame}
+              className="btn-tactile h-8 px-3 rounded-lg bg-emerald-600 text-white font-bold text-xs inline-flex items-center gap-1 shadow-xs hover:bg-emerald-500"
+            >
+              <Play className="w-3 h-3 fill-white" />
+              <span>Mulai Main</span>
+            </button>
           </div>
-        </div>
+        )}
       </div>
-    </motion.div>
+    </motion.aside>
   );
 };
-

@@ -42,52 +42,52 @@ interface TutorialChapterMeta {
 const TUTORIAL_CHAPTERS: Record<number, TutorialChapterMeta> = {
   1: {
     mood: 'happy',
-    title: 'Aturan Blind Start & Matriks 2×2',
+    title: 'Blind Start & Matriks 2×2',
     dialogue:
-      'Halo! Aku Alya, pemandu AhnapQobul! Lihat 4 kartumu yang tersusun 2×2 di bawah. Di awal ronde, semua kartu TERTUTUP RAPAT (Blind Start). Misi utamamu adalah memiliki total poin serendah mungkin!',
-    actionHint: 'Klik tombol "Mengerti, Lanjut!" di kanan untuk mulai praktik',
+      'Semua 4 kartu tertutup rapat di awal. Misi utamamu: kumpulkan total poin serendah mungkin!',
+    actionHint: 'Klik "Lanjut" untuk mulai.',
   },
   2: {
     mood: 'excited',
-    title: 'Langkah 1: Mengambil Kartu dari Dek',
+    title: 'Ambil Kartu',
     dialogue:
-      'Sekarang giliranmu! Coba ketuk tumpukan DEK di tengah meja untuk menarik 1 kartu pertamamu.',
-    actionHint: 'Ketuk tumpukan Dek (kartu tertutup di kiri)',
+      'Sekarang giliranmu! Ketuk tumpukan Dek untuk mengambil 1 kartu.',
+    actionHint: 'Ketuk tumpukan Dek (kiri).',
   },
   3: {
     mood: 'wink',
-    title: 'Langkah 2: Mengaktifkan Kartu Sakti (7 & 8)',
+    title: 'Kartu Sakti 7 & 8',
     dialogue:
-      'Wah, kamu dapat kartu 7♦! Angka 7 & 8 adalah KARTU SAKTI untuk mengintip 1 kartumu sendiri. Ingat: efek sakti HANYA aktif kalau kartu ini langsung kamu buang! Klik "Pakai Efek" sekarang!',
-    actionHint: 'Klik tombol "Pakai Efek" pada modal kartu',
+      'Dapat 7♦! Angka 7 & 8 bisa mengintip kartumu sendiri jika langsung dibuang.',
+    actionHint: 'Pilih "Pakai Efek" di modal kartu.',
   },
   4: {
     mood: 'serious',
-    title: 'Langkah 3: Intip & Hafalkan Kartumu!',
+    title: 'Intip & Hafalkan',
     dialogue:
-      'Bagus! Sekarang ketuk Kartu #1 (kiri atas) di matriks 2×2 milikmu untuk mengintip isinya. Hafalkan baik-baik angkanya, lalu klik "Oke, Hafal!".',
-    actionHint: 'Ketuk Kartu #1 di matriks 2×2 lalu klik "Oke, Hafal!"',
+      'Ketuk Kartu #1 (kiri atas) di mejamu untuk mengintip isinya, lalu klik Tutup.',
+    actionHint: 'Ketuk Kartu #1 di mejamu.',
   },
   5: {
     mood: 'shocked',
-    title: 'Langkah 4: Jeda Refleks (Slam Kartu Kembar!)',
+    title: 'Jeda Refleks (Slam)',
     dialogue:
-      '⚡ JEDA REFLEKS! Kartu 7♦ baru saja mendarat di Buangan! Kalau kamu punya angka kembar (seperti Kartu #1 yang barusan kamu intip = 7♥!), ketuk cepat Kartu #1 untuk membuangnya agar kartumu berkurang!',
-    actionHint: 'Ketuk cepat Kartu #1 saat bar Jeda Refleks aktif (atau tunggu lewat)',
+      'Kartu 7 baru saja dibuang! Jika kartumu juga angka 7, ketuk cepat untuk membuangnya!',
+    actionHint: 'Ketuk Kartu #1 yang bernilai 7!',
   },
   6: {
     mood: 'excited',
-    title: 'Langkah 5: Menukar dengan King Merah (-1 Poin)',
+    title: 'Tukar King Merah (-1 Poin)',
     dialogue:
-      'Lihat! Posisi matriks 2×2 tetap terkunci rapi meski ada kartu yang keluar. Sekarang ketuk DEK lagi — kita akan dapat King Merah (K♥ = -1 Poin, kartu terbaik!) lalu pilih "Tukar" ke salah satu slot kartumu!',
-    actionHint: 'Tarik kartu dari Dek, klik "Tukar", lalu pilih slot di matriks 2×2',
+      'Ambil kartu Dek lagi untuk mendapatkan King Merah (K♥ = -1 poin!), lalu tukar ke mejamu.',
+    actionHint: 'Ambil Dek, pilih Tukar, lalu klik slot kartu.',
   },
   7: {
     mood: 'proud',
-    title: 'Selamat! Kamu Lulus Tutorial AhnapQobul!',
+    title: 'Tutorial Selesai!',
     dialogue:
-      'Keren banget! Kamu sudah menguasai Blind Start, Kartu Sakti (7/8/10/J/Q/K Hitam), Jeda Refleks, dan Tukar Kartu! Di pertandingan asli, kalau yakin poinmu paling kecil, tekan tombol "TERIAK QOBUL!". Siap bertanding?',
-    actionHint: 'Klik "Main Lawan Bot!" atau lanjut bereksperimen di meja ini',
+      'Kamu sudah menguasai aturan dasar! Jika poinmu sudah terkecil di permainan asli, teriak QOBUL!',
+    actionHint: 'Siap bertanding? Klik "Mulai Main".',
   },
 };
 
@@ -184,7 +184,7 @@ export const CardLab: React.FC<CardLabProps> = ({
           dialogue={currentChapter.dialogue}
           actionHint={currentChapter.actionHint}
           canAdvanceNext={tutorialStep === 1 && phase === 'idle'}
-          nextButtonLabel="Mengerti, Lanjut!"
+          nextButtonLabel="Lanjut"
           onNextStep={() => dispatch({ type: 'advance_intro' })}
           onFinishToGame={onOpenFullTable}
           onRestartTutorial={() => {

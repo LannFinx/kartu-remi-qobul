@@ -138,10 +138,10 @@ export const PlayerSeat: React.FC<PlayerSeatProps> = ({
           <button
             type="button"
             onClick={onShoutQobul}
-            className="btn-tactile px-3.5 py-1 rounded-full bg-gradient-to-b from-amber-300 to-amber-500 text-slate-950 border-b-[3px] border-amber-700 font-display font-black text-xs shadow-[0_4px_14px_rgba(245,158,11,0.5)] inline-flex items-center gap-1"
+            className="btn-tactile px-3 py-1 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-display font-black text-xs shadow-md border border-amber-200 inline-flex items-center gap-1 active:scale-95"
           >
             <Flame className="w-3.5 h-3.5 fill-slate-950" />
-            <span>TERIAK QOBUL!</span>
+            <span>QOBUL!</span>
           </button>
         )}
       </div>
